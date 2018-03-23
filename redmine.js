@@ -97,23 +97,16 @@ class Redmine {
       }
     })
     if (issues.issues.length) {
-      let versionField = issues.issues[0].custom_fields.find(function (item) {
-        if (item.name === 'Версия приложения') {
-          return item
-        }
-      })
-      console.log(versionField)
       for (let i = 0; i < issues.issues.length; i++) {
         let data = {
           issue: {
             assigned_to_id: tester.value,
             status_id: this.completeStatus,
-            custom_field_values: {},
+            custom_field_values: {
+              '32': buildNumber
+            },
             notes: 'Build: ' + buildNumber
           }
-        }
-        if (versionField) {
-          data.issue.custom_field_values[versionField.id] = buildNumber
         }
         await this.put('issues/' + issues.issues[i].id + '.json', data)
       }
