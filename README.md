@@ -5,3 +5,7 @@
 
 ## Запуск
 * npm start
+
+## Адреса хуков
+* Github: domain.url:8001/github
+* Bitrise: domain.url:8001/bitrise?project={projectName}
