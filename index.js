@@ -41,7 +41,7 @@ let server = new http.Server(function (req, res) {
           console.log('no pull request')
         }
 
-      } else {
+      } else if(request.indexOf('build_slug') !== -1) {
         console.log('bitrise')
         let q = qs.parse(req.url.split('?')[1])
         let reqParsed = JSON.parse(request)
@@ -50,6 +50,8 @@ let server = new http.Server(function (req, res) {
         } else {
           console.log('bitrise not now')
         }
+      } else {
+        console.log('bad request')
       }
     } catch (error) {
       console.log('parse error')
@@ -58,4 +60,4 @@ let server = new http.Server(function (req, res) {
   });
 });
 
-server.listen(8000, 'localhost');
+server.listen(8001, '0.0.0.0');
