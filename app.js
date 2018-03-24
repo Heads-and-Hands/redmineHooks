@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var stylus = require('stylus');
+var bodyParser = require('body-parser');
 
 var indexRouter = require('./routes/index');
 var githubRouter = require('./routes/github');
@@ -16,15 +17,17 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+//app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(express.json());
+//app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(stylus.middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/github', githubRouter);
-app.use('/bitrise', bitriseRouter);
+app.use('/github', bodyParser.text({type: '*/*'}), githubRouter);
+app.use('/bitrise', bodyParser.json(), bitriseRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
