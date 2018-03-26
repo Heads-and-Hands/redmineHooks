@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  .main_wrapper
+    h1.main_header= title
+    if data.length
+      table.result_table
+        tr
+          th
+          th Дата
+          th Тип операции
+          th Задачи
+          th Проект
+          th Номер сборки
+          th
+
+        each val, index in data
+          tr
+            td
+            td= val.date
+            td= val.type
+            td= val.tasks
+            td= val.project
+            td= val.buildNumber
+            td
+    else
+      .empty_result Результатов еще нет

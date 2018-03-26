@@ -7,9 +7,15 @@ const key = require('./../key.js').key
 var redmine = new redmineService.Redmine(key.redmine)
 var axios = require('axios')
 const keyGithub = key.github
+var dbo = require('./../modules/db')
+var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
-  let log = new Date() + "\r\n"
+  let logDb = {
+    date: new Date(),
+    type: '',
+    tasks: ''
+  }
   if (req.body.pull_request !== undefined) {
     fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", ()=>{});
     let commits = false
@@ -30,24 +36,29 @@ router.post('/', async function (req, res, next) {
     }
     taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
     if (taskNumbers) {
+      logDb.tasks = taskNumbers.join()
       if (req.body.action === 'opened' || req.body.action === 'synchronize') {
-        log += 'pr opened or sync'
+        logDb.type = 'pr opened or sync'
         redmine.setStatusReviewAndTl(taskNumbers)
       } else if (req.body.action === 'closed') {
-        log += 'pr closed'
+        logDb.type = 'pr closed'
         redmine.setStatusReadyBuild(taskNumbers)
       } else if (req.body.action === 'submitted') {
-        log += 'pr submitted'
+        logDb.type = 'pr submitted'
         redmine.setStatusWork(taskNumbers, req.body.review.body)
       }
     } else {
-      log += 'no found task number'
+      logDb.type = 'no found task number'
     }
+    Result.create(logDb, function (err, doc) {
+      if (err) throw err;
+    })
   } else {
-    log += 'no pull request'
+
   }
-  fs.appendFile('./log-result.txt', log + "\r\n\n", ()=>{})
-  res.send(log +' end github')
+
+  //fs.appendFile('./log-result.txt', log + "\r\n\n", ()=>{})
+  res.send('end github')
 });
 
 module.exports = router;

@@ -95,6 +95,7 @@ class Redmine {
   async bitriseHook(projectName, buildNumber) {
     let project = await this.get('projects/' + projectName + '.json')
     let issues = await this.get('issues.json?project_id=' + project.project.id + '&status_id=' + this.readyStatus)
+    let issuesIds = []
     let tester = project.project.custom_fields.find(function (element) {
       if (element.name && element.name === 'Тестировщик') {
         return true
@@ -102,6 +103,7 @@ class Redmine {
     })
     if (issues.issues.length) {
       for (let issue of issues.issues) {
+        issuesIds.push(issue.id)
         let data = {
           issue: {
             assigned_to_id: tester.value,
@@ -117,6 +119,7 @@ class Redmine {
     } else {
       console.log('no issues')
     }
+    return issuesIds
   }
 }
 
