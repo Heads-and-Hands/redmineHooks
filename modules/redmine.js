@@ -34,7 +34,7 @@ class Redmine {
     } catch (error) {
       console.log(error.response.status, error.response.statusText)
     }
-  };
+  }
 
   async put(url, data) {
     try {
@@ -46,10 +46,10 @@ class Redmine {
     } catch (error) {
       console.log(error.response.status, error.response.statusText)
     }
-  };
+  }
 
-  async setStatusReviewAndTl(taskNumber, comment) {
-    let task = await this.get('issues/' + taskNumber + '.json')
+  async setStatusReviewAndTl(taskNumbers, comment) {
+    let task = await this.get('issues/' + taskNumbers[1] + '.json')
     let project = await this.get('projects/' + task.issue.project.id + '.json')
 
     let teamLead = project.project.custom_fields.find(function (element, index) {
@@ -57,35 +57,39 @@ class Redmine {
         return true
       }
     })
-
-    await this.put('issues/' + taskNumber + '.json', {
-      issue: {
-        assigned_to_id: teamLead.value,
-        status_id: this.reviewStatus,
-        notes: comment || ''
-      }
-    })
+    for (let task of taskNumbers) {
+      await this.put('issues/' + task + '.json', {
+        issue: {
+          assigned_to_id: teamLead.value,
+          status_id: this.reviewStatus,
+          notes: comment || ''
+        }
+      })
+    }
   }
 
-  async setStatusReadyBuild(taskNumber) {
-    await this.put('issues/' + taskNumber + '.json', {
-      issue: {
-        status_id: this.readyStatus
-      }
-    })
+  async setStatusReadyBuild(taskNumbers) {
+    for (let task of taskNumbers) {
+      await this.put('issues/' + task + '.json', {
+        issue: {
+          status_id: this.readyStatus
+        }
+      })
+    }
   }
 
-  async setStatusWork(taskNumber, comment) {
-    let task = await this.get('issues/' + taskNumber + '.json?include=journals')
+  async setStatusWork(taskNumbers, comment) {
+    let task = await this.get('issues/' + taskNumbers[1] + '.json?include=journals')
     let user = task.issue.journals.pop().user
-
-    await this.put('issues/' + taskNumber + '.json', {
-      issue: {
-        assigned_to_id: user.id,
-        status_id: this.workStatus,
-        notes: comment || ''
-      }
-    })
+    for (let task of taskNumbers) {
+      await this.put('issues/' + task + '.json', {
+        issue: {
+          assigned_to_id: user.id,
+          status_id: this.workStatus,
+          notes: comment || ''
+        }
+      })
+    }
   }
 
   async bitriseHook(projectName, buildNumber) {
@@ -97,7 +101,7 @@ class Redmine {
       }
     })
     if (issues.issues.length) {
-      for (let i = 0; i < issues.issues.length; i++) {
+      for (let issue of issues.issues) {
         let data = {
           issue: {
             assigned_to_id: tester.value,
@@ -108,7 +112,7 @@ class Redmine {
             notes: 'Build: ' + buildNumber
           }
         }
-        await this.put('issues/' + issues.issues[i].id + '.json', data)
+        await this.put('issues/' + issue.id + '.json', data)
       }
     } else {
       console.log('no issues')
@@ -116,4 +120,4 @@ class Redmine {
   }
 }
 
-exports.Redmine = Redmine;
+exports.Redmine = Redmine

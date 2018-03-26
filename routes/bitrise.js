@@ -4,7 +4,7 @@ const fs = require('fs');
 var qs = require('qs');
 var redmineService = require('./../modules/redmine')
 const key = require('./../key.js').key
-var redmine = new redmineService.Redmine(key)
+var redmine = new redmineService.Redmine(key.redmine)
 
 router.post('/', function(req, res, next) {
   let q = qs.parse(req.url.split('?')[1])

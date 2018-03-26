@@ -1,1 +1,4 @@
-exports.key = 'key';
+exports.key = {
+  github: 'key',
+  redmine: 'key'
+};
