@@ -5,7 +5,6 @@ var cookieParser = require('cookie-parser')
 var logger = require('morgan')
 var stylus = require('stylus')
 var bodyParser = require('body-parser')
-var ip = require('ip')
 const basicAuth = require('express-basic-auth')
 const key = require('./key.js').key
 
@@ -27,18 +26,17 @@ app.use(cookieParser())
 app.use(stylus.middleware(path.join(__dirname, 'public')))
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use(function (req, res, next) {
-  let remoteIp = req.client.remoteAddress
-  if (
-    req.originalUrl.indexOf('github') !== -1 && process.env.DEBUG === undefined &&
-    (!ip.cidrSubnet('192.30.252.0/22').contains(remoteIp) && !ip.cidrSubnet('185.199.108.0/22').contains(remoteIp))
-  ) {
-    res.status(500).send('azaza')
-  } else {
-    next()
-  }
-})
-
+// app.use(function (req, res, next) {
+//   let remoteIp = req.client.remoteAddress
+//   if (
+//     req.originalUrl.indexOf('github') !== -1 && process.env.DEBUG === undefined &&
+//     (!ip.cidrSubnet('192.30.252.0/22').contains(remoteIp) && !ip.cidrSubnet('185.199.108.0/22').contains(remoteIp))
+//   ) {
+//     res.status(500).send('azaza')
+//   } else {
+//     next()
+//   }
+// })
 
 app.use('/', indexRouter)
 app.use('/github', githubRouter)
