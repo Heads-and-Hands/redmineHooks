@@ -9,9 +9,9 @@ var axios = require('axios')
 const keyGithub = key.github
 
 router.post('/', async function (req, res, next) {
-  fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", ()=>{});
   let log = new Date() + "\r\n"
   if (req.body.pull_request !== undefined) {
+    fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", ()=>{});
     let commits = false
     try {
       commits = await axios(req.body.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))

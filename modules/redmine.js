@@ -49,8 +49,8 @@ class Redmine {
   }
 
   async setStatusReviewAndTl(taskNumbers, comment) {
-    let task = await this.get('issues/' + taskNumbers[1] + '.json')
-    let project = await this.get('projects/' + task.issue.project.id + '.json')
+    let taskProject = await this.get('issues/' + taskNumbers[0] + '.json')
+    let project = await this.get('projects/' + taskProject.issue.project.id + '.json')
 
     let teamLead = project.project.custom_fields.find(function (element, index) {
       if (element.name && element.name === 'Старший разработчик') {
@@ -79,7 +79,7 @@ class Redmine {
   }
 
   async setStatusWork(taskNumbers, comment) {
-    let task = await this.get('issues/' + taskNumbers[1] + '.json?include=journals')
+    let task = await this.get('issues/' + taskNumbers[0] + '.json?include=journals')
     let user = task.issue.journals.pop().user
     for (let task of taskNumbers) {
       await this.put('issues/' + task + '.json', {
