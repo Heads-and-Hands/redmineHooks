@@ -34,8 +34,9 @@ router.post('/', async function (req, res, next) {
         }
       }
     }
-    taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
-    if (taskNumbers) {
+
+    if (taskNumbers.length !== 0) {
+      taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
       logDb.tasks = taskNumbers.join()
       if (req.body.action === 'opened' || req.body.action === 'synchronize') {
         logDb.type = 'pr opened or sync'
