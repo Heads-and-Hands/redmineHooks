@@ -9,6 +9,7 @@ class Redmine {
     this.reviewStatus = false
     this.completeStatus = false
     this.workStatus = false
+    this.newStatus = false
     this.getStatuses()
   }
 
@@ -23,6 +24,8 @@ class Redmine {
         this.readyStatus = statuses.issue_statuses[i].id
       } else if (statuses.issue_statuses[i].name === 'В работе') {
         this.workStatus = statuses.issue_statuses[i].id
+      } else if (statuses.issue_statuses[i].name === 'Новая') {
+        this.newStatus = statuses.issue_statuses[i].id
       }
     }
   }
@@ -57,8 +60,10 @@ class Redmine {
         return true
       }
     })
-    for (let task of taskNumbers) {
-      await this.put('issues/' + task + '.json', {
+    taskNumbers.push(31914)
+    for (let taskId of taskNumbers) {
+      await this.checkOnNewStatus(taskId)
+      await this.put('issues/' + taskId + '.json', {
         issue: {
           assigned_to_id: teamLead.value,
           status_id: this.reviewStatus,
@@ -69,8 +74,9 @@ class Redmine {
   }
 
   async setStatusReadyBuild(taskNumbers) {
-    for (let task of taskNumbers) {
-      await this.put('issues/' + task + '.json', {
+    for (let taskId of taskNumbers) {
+      await this.checkOnNewStatus(taskId)
+      await this.put('issues/' + taskId + '.json', {
         issue: {
           status_id: this.readyStatus
         }
@@ -81,8 +87,9 @@ class Redmine {
   async setStatusWork(taskNumbers, comment) {
     let task = await this.get('issues/' + taskNumbers[0] + '.json?include=journals')
     let user = task.issue.journals.pop().user
-    for (let task of taskNumbers) {
-      await this.put('issues/' + task + '.json', {
+    for (let taskId of taskNumbers) {
+      await this.checkOnNewStatus(taskId)
+      await this.put('issues/' + taskId + '.json', {
         issue: {
           assigned_to_id: user.id,
           status_id: this.workStatus,
@@ -120,6 +127,17 @@ class Redmine {
       console.log('no issues')
     }
     return issuesIds
+  }
+
+  async checkOnNewStatus(taskId) {
+    let taskInRedmine = await this.get('issues/' + taskId + '.json')
+    if (taskInRedmine.issue.status.id === this.newStatus) {
+      await this.put('issues/' + taskId + '.json', {
+        issue: {
+          status_id: this.workStatus,
+        }
+      })
+    }
   }
 }
 
