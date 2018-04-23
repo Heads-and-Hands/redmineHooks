@@ -28,7 +28,7 @@ router.post('/', async function (req, res, next) {
     let taskNumbers = []
     if(commits.data){
       for(let value of commits.data){
-        let tasks = value.commit.message.match(/#\d+/g)
+        let tasks = value.commit.message.replace('pull request #','').match(/#\d+/g)
         if(tasks){
           taskNumbers += tasks.join([])
         }
