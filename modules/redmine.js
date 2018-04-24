@@ -60,7 +60,6 @@ class Redmine {
         return true
       }
     })
-    taskNumbers.push(31914)
     for (let taskId of taskNumbers) {
       await this.checkOnNewStatus(taskId)
       await this.put('issues/' + taskId + '.json', {

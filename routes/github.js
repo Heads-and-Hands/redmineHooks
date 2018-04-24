@@ -14,10 +14,12 @@ router.post('/', async function (req, res, next) {
   let logDb = {
     date: new Date(),
     type: '',
-    tasks: ''
+    tasks: '',
+    project: ''
   }
   if (req.body.pull_request !== undefined) {
-    fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", ()=>{});
+    fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {
+    });
     let commits = false
     try {
       commits = await axios(req.body.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
@@ -26,18 +28,26 @@ router.post('/', async function (req, res, next) {
     }
 
     let taskNumbers = []
-    if(commits.data){
-      for(let value of commits.data){
-        let tasks = value.commit.message.replace('pull request #','').match(/#\d+/g)
-        if(tasks){
+    if (commits.data) {
+      for (let value of commits.data) {
+        let tasks = value.commit.message.replace('pull request #', '').match(/#\d+/g)
+        if (tasks) {
           taskNumbers += tasks.join([])
         }
       }
     }
 
+    let featureTask = req.body.pull_request.head.ref.match(/feature\/\d+/g)
+
+    if(featureTask) {
+      featureTask = featureTask.join([]).replace('feature/', '#')
+      taskNumbers += featureTask
+    }
+
     if (taskNumbers.length !== 0) {
       taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
       logDb.tasks = taskNumbers.join()
+      logDb.project = req.body.pull_request.head.repo.name
       if (req.body.action === 'opened' || req.body.action === 'synchronize') {
         logDb.type = 'pr opened or sync'
         redmine.setStatusReviewAndTl(taskNumbers)
