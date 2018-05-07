@@ -40,7 +40,7 @@ a:hover {
 }
 .result_table td,
 .result_table th {
-  padding-left: 8px;
+  padding: 0 8px;
 }
 .result_table th {
   height: 60px;

@@ -14,6 +14,7 @@ router.post('/', async function (req, res, next) {
   let logDb = {
     date: new Date(),
     type: '',
+    author: '',
     tasks: '',
     project: ''
   }
@@ -39,7 +40,7 @@ router.post('/', async function (req, res, next) {
 
     let featureTask = req.body.pull_request.head.ref.match(/feature\/\d+/g)
 
-    if(featureTask) {
+    if (featureTask) {
       featureTask = featureTask.join([]).replace('feature/', '#')
       taskNumbers += featureTask
     }
@@ -49,18 +50,22 @@ router.post('/', async function (req, res, next) {
       logDb.tasks = taskNumbers.join()
       logDb.project = req.body.pull_request.head.repo.name
       if (req.body.action === 'opened' || req.body.action === 'synchronize') {
-        logDb.type = 'pr opened or sync'
+        logDb.type = 'pr ' + req.body.action
         redmine.setStatusReviewAndTl(taskNumbers)
       } else if (req.body.action === 'closed') {
         logDb.type = 'pr closed'
         redmine.setStatusReadyBuild(taskNumbers)
-      } else if (req.body.action === 'submitted') {
+      } else if (req.body.action === 'submitted' && req.body.review.user.login !== 'handhci') {
         logDb.type = 'pr submitted'
         redmine.setStatusWork(taskNumbers, req.body.review.body)
       }
     } else {
       logDb.type = 'no found task number'
     }
+    if (!logDb.type) {
+      logDb.type = 'pr ' + req.body.action + ' (no action)'
+    }
+    logDb.author = req.body.review.user.login
     Result.create(logDb, function (err, doc) {
       if (err) throw err;
     })
