@@ -65,7 +65,11 @@ router.post('/', async function (req, res, next) {
     if (!logDb.type) {
       logDb.type = 'pr ' + req.body.action + ' (no action)'
     }
-    logDb.author = req.body.review.user.login
+    try {
+      logDb.author = req.body.hasOwnProperty('user') ? req.body.review.user.login : req.body.sender.login
+    } catch (error) {
+
+    }
     Result.create(logDb, function (err, doc) {
       if (err) throw err;
     })
