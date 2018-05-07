@@ -85,12 +85,21 @@ class Redmine {
 
   async setStatusWork(taskNumbers, comment) {
     let task = await this.get('issues/' + taskNumbers[0] + '.json?include=journals')
-    let user = task.issue.journals.pop().user
+    const user = task.issue.journals.pop().user
+    let journals = task.issue.journals.reverse()
+    let userDetail = false
+    for (const note of journals){
+      const detail = note.details.find(item => item.name === 'status_id' && item.new_value == this.workStatus)
+      userDetail = note.details.find(item => item.name === 'assigned_to_id')
+      if(detail && userDetail) {
+        break
+      }
+    }
     for (let taskId of taskNumbers) {
       await this.checkOnNewStatus(taskId)
       await this.put('issues/' + taskId + '.json', {
         issue: {
-          assigned_to_id: user.id,
+          assigned_to_id: userDetail.new_value ? userDetail.new_value : user.id,
           status_id: this.workStatus,
           notes: comment || ''
         }
