@@ -21,7 +21,10 @@ block content
             td= val.date
             td= val.type
             td= val.author
-            td= val.tasks
+            td
+              each task, index in val.tasks.split(',')
+               a(href='//pm.handh.ru/issues/' + task target='_blank')= task
+               | &nbsp;
             td= val.project
             td= val.buildNumber
             td

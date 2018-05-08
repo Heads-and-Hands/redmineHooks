@@ -8,8 +8,8 @@ router.get('/', async function (req, res, next) {
     for (let doc of docs) {
       let fDate = doc.date
       doc.date = fDate.getFullYear() + '.' +
-        ('0' + fDate.getMonth()).slice(-2) + '.' +
-        ('0' + fDate.getDay()).slice(-2) + ' ' +
+        ('0' + (fDate.getMonth() + 1)).slice(-2) + '.' +
+        ('0' + fDate.getDate()).slice(-2) + ' ' +
         ('0' + fDate.getHours()).slice(-2) + ':' +
         ('0' + fDate.getMinutes()).slice(-2) + ':' +
         ('0' + fDate.getSeconds()).slice(-2)
