@@ -25,5 +25,3 @@ services:
       MONGO_INITDB_DATABASE: hooks
     networks: 
       - default
-
-      
