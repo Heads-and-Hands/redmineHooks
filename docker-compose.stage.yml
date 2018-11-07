@@ -12,11 +12,9 @@ services:
     networks: 
       - default
     ports:
-      - "80:8001"
-    init: true     
+      - "8001:8001"
+    init: true
     restart: always
-    volumes:
-      - "./app:/app" 
 
   mongo:
     image: mongo
