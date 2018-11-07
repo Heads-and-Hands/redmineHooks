@@ -1,0 +1,25 @@
+version: '3'
+
+networks:
+  default:
+    driver: bridge
+
+services:
+  node: 
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    networks: 
+      - default
+    ports:
+      - "80:8001"
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: hooks
+    networks: 
+      - default
+
+      

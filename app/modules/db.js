@@ -1,4 +1,4 @@
-const url = 'mongodb://localhost:27017/hooks';
+const url = 'mongodb://mongo:27017/hooks';
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
 var Schema = mongoose.Schema;
