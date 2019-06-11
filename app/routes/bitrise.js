@@ -3,8 +3,9 @@ var router = express.Router()
 const fs = require('fs')
 var qs = require('qs')
 var redmineService = require('./../modules/redmine')
-const key = require('./../key.js').key
-var redmine = new redmineService.Redmine(key.redmine)
+const key = process.env;
+var redmine = new redmineService.Redmine(key.KEY_REDMINE)
+
 var dbo = require('./../modules/db')
 var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 

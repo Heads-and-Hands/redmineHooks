@@ -3,10 +3,10 @@ var router = express.Router();
 const fs = require('fs');
 var qs = require('qs');
 var redmineService = require('./../modules/redmine')
-const key = require('./../key.js').key
-var redmine = new redmineService.Redmine(key.redmine)
+const key = process.env;
+var redmine = new redmineService.Redmine(key.KEY_REDMINE)
 var axios = require('axios')
-const keyGithub = key.github
+const keyGithub = key.KEY_GITHUB;
 var dbo = require('./../modules/db')
 var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
@@ -18,6 +18,7 @@ router.post('/', async function (req, res, next) {
     tasks: '',
     project: ''
   }
+  res.send(req.body.pull_request);
   if (req.body.pull_request !== undefined) {
     fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {
     });
@@ -77,7 +78,7 @@ router.post('/', async function (req, res, next) {
 
   }
 
-  //fs.appendFile('./log-result.txt', log + "\r\n\n", ()=>{})
+  fs.appendFile('./log-result.txt', log + "\r\n\n", ()=>{})
   res.send('end github')
 });
 
