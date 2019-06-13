@@ -6,7 +6,7 @@ var logger = require('morgan')
 var stylus = require('stylus')
 var bodyParser = require('body-parser')
 const basicAuth = require('express-basic-auth')
-const key = require('./key.js').key
+const key = process.env;
 
 var indexRouter = require('./routes/index')
 var githubRouter = require('./routes/github')
@@ -43,7 +43,7 @@ app.use('/github', githubRouter)
 app.use('/bitrise', bitriseRouter)
 
 let users = {}
-users[key.adminName] = key.adminPass
+users[key.ADMIN_NAME] = key.ADMIN_NAME
 app.use(basicAuth({
   users: users,
   challenge: true

@@ -1,11 +1,10 @@
 ## Установка проекта
 * npm install
-* Копировать файл key.example.js с новым именем key.js
-* Вписать в файл key.js ключ от редмайна и гитхаба
+* Добавить в переменную окружения KEY_GITHUB ключ от гитхаба в файле docker-compose.yml
+* Добавить в переменную окружения KEY_REDMINE ключ от редмайна в файле docker-compose.yml
 
 ## Запуск
 * npm start
-
 ## Адреса хуков
 * Github: domain.url:8001/github
 * Bitrise: domain.url:8001/bitrise?project={projectName}
