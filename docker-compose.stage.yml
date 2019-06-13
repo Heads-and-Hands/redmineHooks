@@ -11,12 +11,19 @@ services:
       - default
     ports:
       - "8001:8001"
+    environment:
+      - KEY_GITHUB
+      - KEY_REDMINE
+      - ADMIN_NAME=admin
+      - ADMIN_PASS=password
     init: true
     restart: always
 
   mongo:
     image: mongo
     restart: always
+    ports:
+      - "27017:27017"
     environment:
       MONGO_INITDB_DATABASE: hooks
     networks: 
