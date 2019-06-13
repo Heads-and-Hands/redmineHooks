@@ -1,7 +1,7 @@
 ## Установка проекта
 * npm install
-* Добавить в переменную окружения KEY_GITHUB ключ от гитхаба с помощбю команды: set KEY_GITHUB=value
-* Добавить в переменную окружения KEY_REDMINE ключ от редмайна с помощбю команды: set KEY_REDMINE=value
+* Добавить в переменную окружения KEY_GITHUB ключ от гитхаба в файле docker-compose.yml
+* Добавить в переменную окружения KEY_REDMINE ключ от редмайна в файле docker-compose.yml
 
 ## Запуск
 * npm start
