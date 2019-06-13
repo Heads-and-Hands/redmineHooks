@@ -12,10 +12,10 @@ services:
     networks: 
       - default
     ports:
-      - "8001:8001"
+      - "80:8001"
     environment:
-      - KEY_GITHUB=${KEY_GITHUB}
-      - KEY_REDMINE=${KEY_REDMINE}
+      - KEY_GITHUB
+      - KEY_REDMINE
       - ADMIN_NAME=admin
       - ADMIN_PASS=password
     init: true     
