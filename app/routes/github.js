@@ -55,6 +55,7 @@ router.post('/', async function (req, res, next) {
         redmine.setStatusReviewAndTl(taskNumbers)
       } else if (req.body.action === 'closed') {
         logDb.type = 'pr closed'
+        redmine.checkTaskStatus(taskNumbers)
         redmine.setStatusReadyBuild(taskNumbers)
       } else if (req.body.action === 'submitted' && req.body.review.user.login !== 'handhci') {
         logDb.type = 'pr submitted'
