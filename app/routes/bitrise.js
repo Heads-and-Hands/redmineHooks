@@ -10,30 +10,31 @@ var dbo = require('./../modules/db')
 var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
-  let q = qs.parse(req.url.split('?')[1])
-  let reqParsed = req.body
-  let logDb = {
-    date: new Date(),
-    type: '',
-    project: '',
-    buildNumber: ''
-  }
-  fs.appendFile('./log-bitrise.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(reqParsed) + "\r\n\n", () => {})
-  if (reqParsed.build_status === 1 && reqParsed.git.src_branch === 'develop' && reqParsed.git.dst_branch === 'develop') {
-    logDb.type = 'bitrise build'
-    logDb.project = q.project
-    logDb.buildNumber = reqParsed.build_number
-    let tasks = await redmine.bitriseHook(q.project, reqParsed.build_number)
-    logDb.tasks = tasks.join()
-    Result.create(logDb, function (err, doc) {
-      if (err) throw err;
+    let q = qs.parse(req.url.split('?')[1])
+    let reqParsed = req.body
+    let logDb = {
+        date: new Date(),
+        type: '',
+        project: '',
+        buildNumber: ''
+    }
+    fs.appendFile('./log-bitrise.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(reqParsed) + "\r\n\n", () => {
     })
-  } else {
+    if (reqParsed.build_status === 1 && (reqParsed.git.src_branch === 'develop' && reqParsed.git.dst_branch === 'develop') || (reqParsed.git.dst_branch.split("/")[0] === 'release' && reqParsed.git.src_branch.split("/")[0] === 'release')) {
+        logDb.type = 'bitrise build'
+        logDb.project = q.project
+        logDb.buildNumber = reqParsed.build_number
+        let tasks = await redmine.bitriseHook(q.project, reqParsed.build_number)
+        logDb.tasks = tasks.join()
+        Result.create(logDb, function (err, doc) {
+            if (err) throw err;
+        })
+    } else {
 
-  }
+    }
 
-  //fs.appendFile('./log-bitrise.txt', log + "\r\n\n", () => {})
-  res.send('bitrise end')
+    //fs.appendFile('./log-bitrise.txt', log + "\r\n\n", () => {})
+    res.send('bitrise end')
 })
 
 module.exports = router

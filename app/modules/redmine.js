@@ -165,7 +165,7 @@ class Redmine {
                         status_id: this.closeStatus,
                     }
                 })
-           }
+            }
         }
     }
 }
