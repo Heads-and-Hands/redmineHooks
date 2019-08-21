@@ -39,10 +39,11 @@ router.post('/', async function (req, res, next) {
       }
     }
 
-    let featureTask = req.body.pull_request.head.ref.match(/feature\/\d+/g)
+    let task = req.body.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
+    let featureTask = task[0];
 
     if (featureTask) {
-      featureTask = featureTask.join([]).replace('feature/', '#')
+      featureTask = '#' + featureTask
       taskNumbers += featureTask
     }
 
