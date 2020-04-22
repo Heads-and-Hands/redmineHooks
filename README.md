@@ -16,3 +16,5 @@
 
 ### Запуск на сервере
 Скопировать один файл docker-compose.stage.yml на сервер под именем docker-compose.yml и запустить ```docker-compose up -d```
+
+### Описание workflow
