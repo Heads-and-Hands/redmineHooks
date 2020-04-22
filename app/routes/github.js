@@ -18,7 +18,7 @@ router.post('/', async function (req, res, next) {
     tasks: '',
     project: '',
     event: req.header('X-GitHub-Event'),
-    action: req.body.payload.action
+    action: req.body.payload["action"]
   }
   res.send(req.body.payload);
 
