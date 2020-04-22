@@ -24,7 +24,7 @@ router.post('/', async function (req, res, next) {
     action: action
   }
 
-  res.send("Hello!");
+  res.send(action + "\r\n" + event);
   res.send(payload);
   if (event == 'pull_request') {
     //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {});
