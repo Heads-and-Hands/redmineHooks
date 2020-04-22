@@ -38,6 +38,7 @@ router.post('/', async function (req, res, next) {
   let taskNumbers = getTasks(commits)
   logDb.tasks = taskNumbers.join()
 
+  
   switch (event) {
     case 'push':
       redmine.setStatusWork(taskNumbers, "", needAssign)
