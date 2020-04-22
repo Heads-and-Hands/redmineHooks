@@ -20,7 +20,7 @@ router.post('/', async function (req, res, next) {
     event: req.header('X-GitHub-Event'),
     action: req.body.action
   }
-  res.send(req.body.pull_request);
+  res.send(req.body);
 
   if (req.body.pull_request !== undefined) {
     //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {});
