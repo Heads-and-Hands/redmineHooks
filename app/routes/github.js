@@ -18,7 +18,7 @@ router.post('/', async function (req, res, next) {
     tasks: '',
     project: '',
     event: req.header('X-GitHub-Event'),
-    action: req.body.payload["action"]
+    action: req.body.payload["action"],
   }
   res.send(req.body.payload);
 
@@ -70,9 +70,11 @@ router.post('/', async function (req, res, next) {
     } else {
       logDb.type = 'no found task number'
     }
+
     if (!logDb.type) {
       logDb.type = 'pr ' + req.body.action + ' (no action)'
     }
+
     try {
       logDb.author = req.body.hasOwnProperty('user') ? req.body.review.user.login : req.body.sender.login
     } catch (error) {
