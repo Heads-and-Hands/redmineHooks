@@ -19,7 +19,6 @@ router.post('/', async function (req, res, next) {
 
   console.log("Event: " + event + ", Action: " + action)
 
-  
   let logDb = {
     date: new Date(),
     author: payload.sender.login,
@@ -32,13 +31,7 @@ router.post('/', async function (req, res, next) {
 
   res.json(action);
 
-  let commits = false
-  try {
-    commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
-  } catch (error) {
-    console.log(error.response.status, error.response.statusText)
-  }
-  let taskNumbers = getTasks(commits)
+  let taskNumbers = getTasks(payload)
   logDb.tasks = taskNumbers.join()
 
   switch (event) {
@@ -78,8 +71,14 @@ router.post('/', async function (req, res, next) {
   fs.appendFile('./log-result.txt', JSON.stringify(logDb)+ "\r\n\n", ()=>{})  
 });
 
-function getTasks(commits) {
+function getTasks(payload) {
   let taskNumbers = []
+  let commits = false
+  try {
+    commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
+  } catch (error) {
+    console.log(error.response.status, error.response.statusText)
+  }  
   if (commits.data) {
     for (let value of commits.data) {
       let tasks = value.commit.message.replace('pull request #', '').match(/#\d+/g)
