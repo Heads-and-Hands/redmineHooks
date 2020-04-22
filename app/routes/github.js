@@ -25,6 +25,7 @@ router.post('/', async function (req, res, next) {
       return
   }
   
+  
   let action = payload.action
   console.log("Event: " + event + ", Action: " + action)
 
