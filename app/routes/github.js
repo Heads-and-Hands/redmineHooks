@@ -28,13 +28,15 @@ router.post('/', async function (req, res, next) {
   let action = payload.action
   console.log("Event: " + event + ", Action: " + action)
 
-  
+
   let commits = false
-  try {
-    commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
-  } catch (error) {
-    console.log(error.response.status, error.response.statusText)
-  }  
+  if (event == "pull_request" || event == "review_requested") {
+    try {
+      commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
+    } catch (error) {
+      console.log(error.response.status, error.response.statusText)
+    }  
+  }
   let taskNumbers = getTasks(commits, payload)
 
   let logDb = {
@@ -54,10 +56,10 @@ router.post('/', async function (req, res, next) {
       break;
     case 'pull_request':
       switch (action) {
-        case 'opened':
-        case 'synchronize':
-          redmine.setStatusWork(taskNumbers, "", needAssign)
-          break
+        // case 'opened':
+        // case 'synchronize':
+          // redmine.setStatusWork(taskNumbers, "", needAssign)
+          // break
         case 'review_requested':
           redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
           break;
