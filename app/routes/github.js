@@ -28,7 +28,7 @@ router.post('/', async function (req, res, next) {
   let action = payload.action
   console.log("Event: " + event + ", Action: " + action)
 
-  
+
   let commits = false
   if (event == "pull_request" || event == "review_requested") {
     try {
@@ -43,7 +43,7 @@ router.post('/', async function (req, res, next) {
     date: new Date(),
     author: payload.sender.login,
     tasks: taskNumbers.join(),
-    project: payload.pull_request.head ? payload.pull_request.head.repo.name : '',
+    project: payload.pull_request ? payload.pull_request.head.repo.name : '',
     event: event,
     action: action,
     needAssign: needAssign
