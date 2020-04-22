@@ -21,7 +21,7 @@ router.post('/', async function (req, res, next) {
     date: new Date(),
     author: payload.sender.login,
     tasks: '',
-    project: '',
+    project: payload.pull_request.head.repo.name,
     event: event,
     action: action,
     needAssign: needAssign
@@ -29,52 +29,73 @@ router.post('/', async function (req, res, next) {
 
   res.json(action);
 
-  if (event == 'pull_request') {
-    let commits = false
-    try {
-      commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
-    } catch (error) {
-      console.log(error.response.status, error.response.statusText)
-    }
+  let commits = false
+  try {
+    commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
+  } catch (error) {
+    console.log(error.response.status, error.response.statusText)
+  }
+  let taskNumbers = getTasks(commits)
+  logDb.tasks = taskNumbers.join()
 
-    let taskNumbers = []
-    if (commits.data) {
-      for (let value of commits.data) {
-        let tasks = value.commit.message.replace('pull request #', '').match(/#\d+/g)
-        if (tasks) {
-          taskNumbers += tasks.join([])
-        }
+  switch (event) {
+    case 'push':
+      redmine.setStatusWork(taskNumbers, "", needAssign)
+      break;
+    case 'pull_request':
+      switch (action) {
+        case 'opened':
+        case 'synchronize':
+          redmine.setStatusWork(taskNumbers, "", needAssign)
+          break
+        case 'review_requested':
+          redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
+          break;
+        case 'closed':
+          redmine.checkTaskStatus(taskNumbers)
+          redmine.setStatusReadyBuild(taskNumbers)
+          break;
+        default:
       }
-    }
-
-    let task = payload.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
-    let featureTask = task[0];
-
-    if (featureTask) {
-      featureTask = '#' + featureTask
-      taskNumbers += featureTask
-    }
-
-    if (taskNumbers.length !== 0) {
-      taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
-      logDb.tasks = taskNumbers.join()
-      logDb.project = payload.pull_request.head.repo.name
-      if (action === 'opened' || action === 'synchronize') {
-        redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
-      } else if (action === 'closed') {
-        redmine.checkTaskStatus(taskNumbers)
-        redmine.setStatusReadyBuild(taskNumbers)
-      } else if (action === 'submitted' && payload.review.user.login !== 'handhci') {
-        redmine.setStatusWork(taskNumbers, payload.review.body, needAssign)
+      break
+    case 'pull_request_review':
+      switch (action) {
+        case 'changes_requested':
+          redmine.setStatusWork(taskNumbers, payload.review.body, needAssign)
+          break;
+        default:
       }
-    }
-
-    Result.create(logDb, function (err, doc) {
-      if (err) throw err;
-    })
+      break
+    default:
   }
 
+  Result.create(logDb, function (err, doc) {
+    if (err) throw err;
+  })
   fs.appendFile('./log-result.txt', JSON.stringify(logDb)+ "\r\n\n", ()=>{})  
 });
+
+function getTasks(commits) {
+  let taskNumbers = []
+  if (commits.data) {
+    for (let value of commits.data) {
+      let tasks = value.commit.message.replace('pull request #', '').match(/#\d+/g)
+      if (tasks) {
+        taskNumbers += tasks.join([])
+      }
+    }
+  }
+  let task = payload.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
+  let featureTask = task[0];
+
+  if (featureTask) {
+    featureTask = '#' + featureTask
+    taskNumbers += featureTask
+  }
+  if (taskNumbers.length !== 0) {
+    taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
+  }  
+  return taskNumbers
+}
 
 module.exports = router;
