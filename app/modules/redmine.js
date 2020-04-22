@@ -54,7 +54,7 @@ class Redmine {
         }
     }
 
-    async setStatusReviewAndTl(taskNumbers, comment) {
+    async setStatusReviewAndTl(taskNumbers, comment, needAssign = true) {
         let taskProject = await this.get('issues/' + taskNumbers[0] + '.json')
         let project = await this.get('projects/' + taskProject.issue.project.id + '.json')
 
@@ -65,13 +65,16 @@ class Redmine {
         })
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
-            await this.put('issues/' + taskId + '.json', {
+            let payload = {
                 issue: {
-                    assigned_to_id: teamLead.value,
                     status_id: this.reviewStatus,
                     notes: comment || ''
                 }
-            })
+            }
+            if (needAssign) {
+                payload["issue"]["assigned_to_id"] = teamLead.value
+            }
+            await this.put('issues/' + taskId + '.json', payload)
         }
     }
 
@@ -86,7 +89,7 @@ class Redmine {
         }
     }
 
-    async setStatusWork(taskNumbers, comment) {
+    async setStatusWork(taskNumbers, comment, needAssign = true) {
         let task = await this.get('issues/' + taskNumbers[0] + '.json?include=journals')
         const user = task.issue.journals.pop().user
         let journals = task.issue.journals.reverse()
@@ -100,17 +103,20 @@ class Redmine {
         }
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
-            await this.put('issues/' + taskId + '.json', {
+            let payload = {
                 issue: {
-                    assigned_to_id: userDetail.new_value ? userDetail.new_value : user.id,
                     status_id: this.workStatus,
                     notes: comment || ''
                 }
-            })
+            }
+            if (needAssign) {
+                payload["issue"]["assigned_to_id"] = userDetail.new_value ? userDetail.new_value : user.id
+            }
+            await this.put('issues/' + taskId + '.json', payload)
         }
     }
 
-    async bitriseHook(projectName, buildNumber) {
+    async bitriseHook(projectName, buildNumber, needAssign = true) {
         let project = await this.get('projects/' + projectName + '.json')
         let issues = await this.get('issues.json?project_id=' + project.project.id + '&status_id=' + this.readyStatus)
         let issuesIds = []
@@ -122,9 +128,8 @@ class Redmine {
         if (issues.issues.length) {
             for (let issue of issues.issues) {
                 issuesIds.push(issue.id)
-                let data = {
+                let payload = {
                     issue: {
-                        assigned_to_id: tester.value,
                         status_id: this.completeStatus,
                         custom_field_values: {
                             '32': buildNumber
@@ -132,7 +137,10 @@ class Redmine {
                         notes: 'Build: ' + buildNumber
                     }
                 }
-                await this.put('issues/' + issue.id + '.json', data)
+                if (needAssign) {
+                    payload["issue"]["assigned_to_id"] = tester.value
+                }
+                await this.put('issues/' + issue.id + '.json', payload)
             }
         } else {
             console.log('no issues')
