@@ -13,7 +13,7 @@ var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 router.post('/', async function (req, res, next) {
   
   let event = req.header('X-GitHub-Event')
-  let payload = req.body.payload
+  let payload = req.body
   let action = payload.action
 
   let logDb = {
@@ -26,7 +26,7 @@ router.post('/', async function (req, res, next) {
     action: action
   }
 
-  res.send(action + "\r\n" + event + "\r\n" + JSON.stringify(payload.pull_request.commits_url));
+  res.send(action + "\r\n" + event + "\r\n");
   res.send(payload);
   if (event == 'pull_request') {
     //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {});
