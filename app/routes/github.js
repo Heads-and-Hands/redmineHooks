@@ -29,6 +29,8 @@ router.post('/', async function (req, res, next) {
       console.log(error.response.status, error.response.statusText)
     }
 
+    let needAssign = !req.query.assign ? false : req.query.assign
+
     let taskNumbers = []
     if (commits.data) {
       for (let value of commits.data) {
@@ -53,14 +55,14 @@ router.post('/', async function (req, res, next) {
       logDb.project = req.body.pull_request.head.repo.name
       if (req.body.action === 'opened' || req.body.action === 'synchronize') {
         logDb.type = 'pr ' + req.body.action
-        redmine.setStatusReviewAndTl(taskNumbers)
+        redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
       } else if (req.body.action === 'closed') {
         logDb.type = 'pr closed'
         redmine.checkTaskStatus(taskNumbers)
         redmine.setStatusReadyBuild(taskNumbers)
       } else if (req.body.action === 'submitted' && req.body.review.user.login !== 'handhci') {
         logDb.type = 'pr submitted'
-        redmine.setStatusWork(taskNumbers, req.body.review.body)
+        redmine.setStatusWork(taskNumbers, req.body.review.body, needAssign)
       }
     } else {
       logDb.type = 'no found task number'
