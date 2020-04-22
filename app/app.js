@@ -48,7 +48,6 @@ app.use(basicAuth({
   users: users,
   challenge: true
 }))
-
 app.use('/results', resultsRouter)
 
 // catch 404 and forward to error handler

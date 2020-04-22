@@ -29,12 +29,11 @@ router.post('/', async function (req, res, next) {
   //res.send(JSON.stringify(req.body));
   res.json(action);
 
+  // Если мы создали PR или запушили в его ветку
   if (event == 'pull_request') {
-    //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {});
-    //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + "\r\n\n", () => {});
     let commits = false
     try {
-      commits = await axios(req.body.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
+      commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
     } catch (error) {
       console.log(error.response.status, error.response.statusText)
     }
@@ -62,28 +61,28 @@ router.post('/', async function (req, res, next) {
     if (taskNumbers.length !== 0) {
       taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
       logDb.tasks = taskNumbers.join()
-      logDb.project = req.body.pull_request.head.repo.name
-      if (req.body.action === 'opened' || req.body.action === 'synchronize') {
-        logDb.type = 'pr ' + req.body.action
+      logDb.project = payload.pull_request.head.repo.name
+      if (action === 'opened' || action === 'synchronize') {
+        logDb.type = 'pr ' + action
         redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
-      } else if (req.body.action === 'closed') {
+      } else if (action === 'closed') {
         logDb.type = 'pr closed'
         redmine.checkTaskStatus(taskNumbers)
         redmine.setStatusReadyBuild(taskNumbers)
-      } else if (req.body.action === 'submitted' && req.body.review.user.login !== 'handhci') {
+      } else if (action === 'submitted' && payload.review.user.login !== 'handhci') {
         logDb.type = 'pr submitted'
-        redmine.setStatusWork(taskNumbers, req.body.review.body, needAssign)
+        redmine.setStatusWork(taskNumbers, payload.review.body, needAssign)
       }
     } else {
       logDb.type = 'no found task number'
     }
 
     if (!logDb.type) {
-      logDb.type = 'pr ' + req.body.action + ' (no action)'
+      logDb.type = 'pr ' + action + ' (no action)'
     }
 
     try {
-      logDb.author = req.body.hasOwnProperty('user') ? req.body.review.user.login : req.body.sender.login
+      logDb.author = payload.hasOwnProperty('user') ? payload.review.user.login : payload.sender.login
     } catch (error) {
 
     }
