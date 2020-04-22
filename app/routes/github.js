@@ -97,13 +97,16 @@ function getTasks(commits, payload) {
       }
     }
   }
-  let task = payload.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
-  let featureTask = task[0];
-
-  if (featureTask) {
-    featureTask = '#' + featureTask
-    taskNumbers += featureTask
+  
+  if (payload.pull_request) {
+    let task = payload.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
+    let featureTask = task[0];
+    if (featureTask) {
+      featureTask = '#' + featureTask
+      taskNumbers += featureTask
+    }
   }
+
   if (taskNumbers.length !== 0) {
     taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
   }  
