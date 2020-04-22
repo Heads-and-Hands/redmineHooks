@@ -28,6 +28,7 @@ router.post('/', async function (req, res, next) {
   let action = payload.action
   console.log("Event: " + event + ", Action: " + action)
 
+  
   let commits = false
   try {
     commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
