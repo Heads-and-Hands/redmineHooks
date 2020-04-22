@@ -43,7 +43,7 @@ app.use('/github', githubRouter)
 app.use('/bitrise', bitriseRouter)
 
 let users = {}
-users[key.ADMIN_NAME] = key.ADMIN_NAME
+users[key.ADMIN_NAME] = key.ADMIN_PASS
 app.use(basicAuth({
   users: users,
   challenge: true
