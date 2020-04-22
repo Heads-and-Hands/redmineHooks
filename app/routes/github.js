@@ -18,11 +18,11 @@ router.post('/', async function (req, res, next) {
     tasks: '',
     project: '',
     event: req.header('X-GitHub-Event'),
-    action: req.body.action
+    action: req.body.payload.action
   }
-  res.send(req.body);
+  res.send(req.body.payload.pull_request);
 
-  if (req.body.pull_request !== undefined) {
+  if (req.body.payload.pull_request !== undefined) {
     //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {});
     //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + "\r\n\n", () => {});
     let commits = false
