@@ -12,24 +12,23 @@ var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
   
+  let needAssign = !req.query.assign ? false : req.query.assign
   let event = req.header('X-GitHub-Event')
   let payload = JSON.parse(req.body.payload)
   let action = payload.action
 
   let logDb = {
     date: new Date(),
-    type: '',
-    author: '',
+    author: payload.sender.login,
     tasks: '',
     project: '',
     event: event,
-    action: action
+    action: action,
+    needAssign: needAssign
   }
 
-  //res.send(JSON.stringify(req.body));
   res.json(action);
 
-  // Если мы создали PR или запушили в его ветку
   if (event == 'pull_request') {
     let commits = false
     try {
@@ -37,8 +36,6 @@ router.post('/', async function (req, res, next) {
     } catch (error) {
       console.log(error.response.status, error.response.statusText)
     }
-
-    let needAssign = !req.query.assign ? false : req.query.assign
 
     let taskNumbers = []
     if (commits.data) {
@@ -50,7 +47,7 @@ router.post('/', async function (req, res, next) {
       }
     }
 
-    let task = req.body.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
+    let task = payload.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
     let featureTask = task[0];
 
     if (featureTask) {
@@ -63,29 +60,15 @@ router.post('/', async function (req, res, next) {
       logDb.tasks = taskNumbers.join()
       logDb.project = payload.pull_request.head.repo.name
       if (action === 'opened' || action === 'synchronize') {
-        logDb.type = 'pr ' + action
         redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
       } else if (action === 'closed') {
-        logDb.type = 'pr closed'
         redmine.checkTaskStatus(taskNumbers)
         redmine.setStatusReadyBuild(taskNumbers)
       } else if (action === 'submitted' && payload.review.user.login !== 'handhci') {
-        logDb.type = 'pr submitted'
         redmine.setStatusWork(taskNumbers, payload.review.body, needAssign)
       }
-    } else {
-      logDb.type = 'no found task number'
     }
 
-    if (!logDb.type) {
-      logDb.type = 'pr ' + action + ' (no action)'
-    }
-
-    try {
-      logDb.author = payload.hasOwnProperty('user') ? payload.review.user.login : payload.sender.login
-    } catch (error) {
-
-    }
     Result.create(logDb, function (err, doc) {
       if (err) throw err;
     })
