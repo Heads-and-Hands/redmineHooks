@@ -16,12 +16,15 @@ router.post('/', async function (req, res, next) {
     type: '',
     author: '',
     tasks: '',
-    project: ''
+    project: '',
+    event: req.header('X-GitHub-Event'),
+    action: req.body.action
   }
   res.send(req.body.pull_request);
+
   if (req.body.pull_request !== undefined) {
     //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {});
-    fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + "\r\n\n", () => {});
+    //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + "\r\n\n", () => {});
     let commits = false
     try {
       commits = await axios(req.body.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
