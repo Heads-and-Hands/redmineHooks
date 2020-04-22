@@ -82,7 +82,7 @@ router.post('/', async function (req, res, next) {
 
   }
 
-  fs.appendFile('./log-result.txt', logDb + "\r\n\n", ()=>{})
+  fs.appendFile('./log-result.txt', JSON.stringify(logDb)+ "\r\n\n", ()=>{})
   res.send('end github')
 });
 
