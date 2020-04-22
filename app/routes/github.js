@@ -86,10 +86,9 @@ router.post('/', async function (req, res, next) {
     Result.create(logDb, function (err, doc) {
       if (err) throw err;
     })
-
-    fs.appendFile('./log-result.txt', JSON.stringify(logDb)+ "\r\n\n", ()=>{})
-
   }
+
+  fs.appendFile('./log-result.txt', JSON.stringify(logDb)+ "\r\n\n", ()=>{})  
 });
 
 module.exports = router;
