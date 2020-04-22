@@ -17,6 +17,8 @@ router.post('/', async function (req, res, next) {
   let payload = JSON.parse(req.body.payload)
   let action = payload.action
 
+  console.log("Event: " + event + ", Action: " + action)
+
   let logDb = {
     date: new Date(),
     author: payload.sender.login,
