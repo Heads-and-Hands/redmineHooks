@@ -13,7 +13,7 @@ var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 router.post('/', async function (req, res, next) {
   
   let event = req.header('X-GitHub-Event')
-  let payload = req.body
+  let payload = req.body.payload
   let action = payload.action
 
   let logDb = {
