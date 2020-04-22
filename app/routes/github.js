@@ -28,6 +28,7 @@ router.post('/', async function (req, res, next) {
   let action = payload.action
   console.log("Event: " + event + ", Action: " + action)
 
+  
   let commits = false
   if (event == "pull_request" || event == "review_requested") {
     try {
