@@ -11,12 +11,21 @@ var dbo = require('./../modules/db')
 var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
-  
+
   let needAssign = !req.query.assign ? false : req.query.assign
   let event = req.header('X-GitHub-Event')
   let payload = JSON.parse(req.body.payload)
-  let action = payload.action
 
+  switch (event) {
+    case 'push':
+    case 'pull_request':
+    case 'pull_request_review':
+      break;
+    default:
+      return
+  }
+  
+  let action = payload.action
   console.log("Event: " + event + ", Action: " + action)
 
   let commits = false
