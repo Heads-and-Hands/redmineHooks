@@ -11,18 +11,21 @@ var dbo = require('./../modules/db')
 var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
+  let event = req.header('X-GitHub-Event')
+  let payload = req.body.payload
+  let action = payload.action
   let logDb = {
     date: new Date(),
     type: '',
     author: '',
     tasks: '',
     project: '',
-    event: req.header('X-GitHub-Event'),
-    action: req.body.payload["action"],
+    event: event,
+    action: action
   }
-  res.send(req.body.payload);
 
-  if (req.body.payload.pull_request !== undefined) {
+  res.send(payload);
+  if (event == 'pull_request') {
     //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {});
     //fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + "\r\n\n", () => {});
     let commits = false
@@ -83,12 +86,10 @@ router.post('/', async function (req, res, next) {
     Result.create(logDb, function (err, doc) {
       if (err) throw err;
     })
-  } else {
+
+    fs.appendFile('./log-result.txt', JSON.stringify(logDb)+ "\r\n\n", ()=>{})
 
   }
-
-  fs.appendFile('./log-result.txt', JSON.stringify(logDb)+ "\r\n\n", ()=>{})
-  res.send('end github')
 });
 
 module.exports = router;
