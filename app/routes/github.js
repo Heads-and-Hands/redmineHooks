@@ -21,7 +21,7 @@ router.post('/', async function (req, res, next) {
     date: new Date(),
     author: payload.sender.login,
     tasks: '',
-    project: payload.pull_request.head.repo.name,
+    project: payload.pull_request.head ? payload.pull_request.head.repo.name : '',
     event: event,
     action: action,
     needAssign: needAssign
@@ -38,7 +38,7 @@ router.post('/', async function (req, res, next) {
   let taskNumbers = getTasks(commits)
   logDb.tasks = taskNumbers.join()
 
-  
+
   switch (event) {
     case 'push':
       redmine.setStatusWork(taskNumbers, "", needAssign)
