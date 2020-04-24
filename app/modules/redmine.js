@@ -111,12 +111,12 @@ class Redmine {
 
     async getUserIdByGHLogin(login) {
         var user_id = 0
-        if (assignTo != null) {
-            let url = this.statHost + 'users?token=' + this.statToken + '&search=' + assignTo
+        if (login != null) {
+            let url = this.statHost + 'users?token=' + this.statToken + '&search=' + login
             try {
                 let response = await axios.get(url)
                 for (let u of response.data) {
-                    if (u.GitHub == assignTo) {
+                    if (u.GitHub == login) {
                         user_id = u.Id
                         break
                     }
