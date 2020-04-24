@@ -63,7 +63,7 @@ class Redmine {
 
         //let taskProject = await this.get('issues/' + taskNumbers[0] + '.json')
         //let project = await this.get('projects/' + taskProject.issue.project.id + '.json')
-        let user_id = this.getUserIdByGHLogin(assignTo)
+        let user_id = await this.getUserIdByGHLogin(assignTo)
 
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
@@ -94,7 +94,7 @@ class Redmine {
 
     async setStatusWork(taskNumbers, comment, assignTo = null) {
         console.log("setStatusWorkAndAssignTo: " + assignTo)
-        let user_id = this.getUserIdByGHLogin(assignTo)
+        let user_id = await this.getUserIdByGHLogin(assignTo)
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
             let payload = {
