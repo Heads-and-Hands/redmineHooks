@@ -26,20 +26,51 @@ router.post('/', async function (req, res, next) {
   }
   
   let action = payload.action
+  let author = payload.sender.login
 
   let commits = false
-  if (event == "pull_request" || event == "review_requested") {
+  let taskNumbers = []
+  if (event == "pull_request") {
     try {
       commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
+      commits = commits.data
+      for (let value of commits) {
+        let tasks = value.commit.message.replace('pull request #', '').match(/#\d+/g)
+        if (tasks) {
+          taskNumbers += tasks.join([])
+        }
+      }
+      let task = payload.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
+      let featureTask = task[0];
+      if (featureTask) {
+        featureTask = '#' + featureTask
+        taskNumbers += featureTask
+      }      
     } catch (error) {
       console.log(error.response.status, error.response.statusText)
     }  
+  } else if (event == "push") {
+    commits = payload.commits
+    for (let commit of commits) {
+      let tasks = value.commit.message.match(/#\d+/g)
+      if (tasks) {
+        taskNumbers += tasks.join([])
+      }      
+    }
+    let task = payload.ref.split('feature/')[1].match(/\d+/g);
+    let featureTask = task[0];
+    if (featureTask) {
+      featureTask = '#' + featureTask
+      taskNumbers += featureTask
+    }     
   }
-  let taskNumbers = getTasks(commits, payload)
+  if (taskNumbers.length !== 0) {
+    taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
+  }  
 
   let logDb = {
     date: new Date(),
-    author: payload.sender.login,
+    author: author,
     tasks: taskNumbers.join(),
     project: payload.pull_request ? payload.pull_request.head.repo.name : '',
     event: event,
@@ -51,7 +82,7 @@ router.post('/', async function (req, res, next) {
 
   switch (event) {
     case 'push':
-      let assignTo = needAssign ? payload.pusher.name : null
+      let assignTo = needAssign ? author : null
       redmine.setStatusWork(taskNumbers, "", assignTo)
       break;
     case 'pull_request':
@@ -91,32 +122,5 @@ router.post('/', async function (req, res, next) {
   })
   fs.appendFile('./log-result.txt', JSON.stringify(logDb)+ "\r\n\n", ()=>{})  
 });
-
-function getTasks(commits, payload) {
-  let taskNumbers = []
-
-  if (commits.data) {
-    for (let value of commits.data) {
-      let tasks = value.commit.message.replace('pull request #', '').match(/#\d+/g)
-      if (tasks) {
-        taskNumbers += tasks.join([])
-      }
-    }
-  }
-  
-  if (payload.pull_request) {
-    let task = payload.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
-    let featureTask = task[0];
-    if (featureTask) {
-      featureTask = '#' + featureTask
-      taskNumbers += featureTask
-    }
-  }
-
-  if (taskNumbers.length !== 0) {
-    taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
-  }  
-  return taskNumbers
-}
 
 module.exports = router;
