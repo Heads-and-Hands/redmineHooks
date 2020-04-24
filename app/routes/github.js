@@ -12,7 +12,7 @@ var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
 
-  let needAssign = !req.query.assign ? false : req.query.assign
+  let needAssign = !req.query.assign ? false : (req.query.assign == 'true')
   let event = req.header('X-GitHub-Event')
   let payload = JSON.parse(req.body.payload)
 
