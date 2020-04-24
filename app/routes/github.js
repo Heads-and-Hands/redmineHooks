@@ -49,6 +49,7 @@ router.post('/', async function (req, res, next) {
   }
   res.json(action);  
 
+  
   switch (event) {
     case 'push':
       let assignTo = needAssign ? payload.pusher.name : null
