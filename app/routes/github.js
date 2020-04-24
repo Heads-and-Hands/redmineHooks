@@ -92,17 +92,9 @@ router.post('/', async function (req, res, next) {
       break;
     case 'pull_request':
       switch (action) {
-        // case 'opened':
-        // case 'synchronize':
-          // redmine.setStatusWork(taskNumbers, "", needAssign)
-          // break
         case 'review_requested':
           redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
           break;
-        // case 'closed':
-          // redmine.checkTaskStatus(taskNumbers)
-          // redmine.setStatusReadyBuild(taskNumbers)
-          // break;
         default:
       }
       break
