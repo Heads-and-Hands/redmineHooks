@@ -98,7 +98,6 @@ class Redmine {
         var user_id = 0
         if (assignTo != null) {
             let url = this.statHost + 'stat?token=' + this.statToken + '&search=' + assignTo
-            console.log(url)
             try {
                 const response = await axios.get(url)
             } catch {
@@ -111,8 +110,6 @@ class Redmine {
                 }
             }
         }
-        console.log(taskNumbers.join())
-        
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
             let payload = {
@@ -124,7 +121,6 @@ class Redmine {
             if (assignTo != null) {
                 payload["issue"]["assigned_to_id"] = user_id
             }
-            console.log('issues/' + taskId + '.json\n' + payload)
             await this.put('issues/' + taskId + '.json', payload)
         }
     }
