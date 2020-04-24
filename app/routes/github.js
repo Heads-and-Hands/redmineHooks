@@ -96,7 +96,7 @@ router.post('/', async function (req, res, next) {
           if (needAssign == true) {
             assignTo = payload.pull_request.requested_reviewers[0].login
           }
-          redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
+          redmine.setStatusReviewAndTl(taskNumbers, "", assignTo)
           break;
         default:
       }
