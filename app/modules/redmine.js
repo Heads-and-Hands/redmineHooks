@@ -58,15 +58,13 @@ class Redmine {
         }
     }
 
-    async setStatusReviewAndTl(taskNumbers, comment, needAssign = true) {
-        let taskProject = await this.get('issues/' + taskNumbers[0] + '.json')
-        let project = await this.get('projects/' + taskProject.issue.project.id + '.json')
+    async setStatusReviewAndTl(taskNumbers, comment, assignTo = null) {
+        console.log("setStatusReviewAndTl: " + assignTo)
 
-        let teamLead = project.project.custom_fields.find(function (element, index) {
-            if (element.name && element.name === 'Старший разработчик') {
-                return true
-            }
-        })
+        let taskProject = await this.get('issues/' + taskNumbers[0] + '.json')
+        //let project = await this.get('projects/' + taskProject.issue.project.id + '.json')
+        let user_id = this.getUserIdByGHLogin(assignTo)
+
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
             let payload = {
@@ -75,8 +73,8 @@ class Redmine {
                     notes: comment || ''
                 }
             }
-            if (needAssign) {
-                payload["issue"]["assigned_to_id"] = teamLead.value
+            if (assignTo != null) {
+                payload["issue"]["assigned_to_id"] = user_id
             }
             await this.put('issues/' + taskId + '.json', payload)
         }
@@ -95,22 +93,7 @@ class Redmine {
 
     async setStatusWork(taskNumbers, comment, assignTo = null) {
         console.log("setStatusWorkAndAssignTo: " + assignTo)
-        var user_id = 0
-        if (assignTo != null) {
-            let url = this.statHost + 'users?token=' + this.statToken + '&search=' + assignTo
-            try {
-                console.log(url)
-                let response = await axios.get(url)
-                for (let u of response.data) {
-                    if (u.GitHub == assignTo) {
-                        user_id = u.Id
-                        break
-                    }
-                }
-            } catch {
-                console.log(error.response.status, error.response.statusText)
-            }
-        }
+        let user_id = this.getUserIdByGHLogin(assignTo)
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
             let payload = {
@@ -124,6 +107,25 @@ class Redmine {
             }
             await this.put('issues/' + taskId + '.json', payload)
         }
+    }
+
+    async getUserIdByGHLogin(login) {
+        var user_id = 0
+        if (assignTo != null) {
+            let url = this.statHost + 'users?token=' + this.statToken + '&search=' + assignTo
+            try {
+                let response = await axios.get(url)
+                for (let u of response.data) {
+                    if (u.GitHub == assignTo) {
+                        user_id = u.Id
+                        break
+                    }
+                }
+            } catch {
+                console.log(error.response.status, error.response.statusText)
+            }
+        }
+        return user_id
     }
 
     async bitriseHook(projectName, buildNumber, needAssign = true) {

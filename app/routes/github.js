@@ -28,6 +28,7 @@ router.post('/', async function (req, res, next) {
   
   let action = payload.action
   let author = payload.sender.login
+  var assignTo = null
 
   let commits = false
   let taskNumbers = []
@@ -84,7 +85,6 @@ router.post('/', async function (req, res, next) {
 
   switch (event) {
     case 'push':
-      var assignTo = null
       if (needAssign == true) {
         assignTo = author
       }
@@ -93,6 +93,9 @@ router.post('/', async function (req, res, next) {
     case 'pull_request':
       switch (action) {
         case 'review_requested':
+          if (needAssign == true) {
+            assignTo = payload.pull_request.requested_reviewers[0].login
+          }
           redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
           break;
         default:
