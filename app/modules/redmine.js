@@ -94,7 +94,7 @@ class Redmine {
     }
 
     async setStatusWork(taskNumbers, comment, assignTo = null) {
-        console.log("setStatusWork")
+        console.log("setStatusWorkAndAssignTo: " + assignTo)
         var user_id = 0
         if (assignTo != null) {
             let url = this.statHost + 'stat?token=' + this.statToken + '&search=' + assignTo
