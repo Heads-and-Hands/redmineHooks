@@ -107,6 +107,7 @@ class Redmine {
                 }
             }
         }
+        
         console.log(taskNumbers.join())
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
