@@ -6,7 +6,7 @@ class Redmine {
         this.key = key
         this.host = 'https://pm.handh.ru/'
 
-        this.statHost = 'https://stat.handh.ru:9898/'
+        this.statHost = 'http://stat.handh.ru:9898/'
         this.statToken = 'keddva5rd'
 
         this.readyStatus = false
