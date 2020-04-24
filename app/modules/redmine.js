@@ -94,7 +94,7 @@ class Redmine {
     }
 
     async setStatusWork(taskNumbers, comment, assignTo = null) {
-        
+        console.log("setStatusWork")
         var user_id = 0
         if (assignTo != null) {
             let url = this.statHost + 'stat?token=' + this.statToken + '&search=' + assignTo
@@ -107,6 +107,7 @@ class Redmine {
                 }
             }
         }
+        console.log(taskNumbers.join())
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
             let payload = {
@@ -115,7 +116,6 @@ class Redmine {
                     notes: comment || ''
                 }
             }
-
             if (assignTo != null) {
                 payload["issue"]["assigned_to_id"] = user_id
             }
