@@ -61,7 +61,7 @@ class Redmine {
     async setStatusReviewAndTl(taskNumbers, comment, assignTo = null) {
         console.log("setStatusReviewAndTl: " + assignTo)
 
-        let taskProject = await this.get('issues/' + taskNumbers[0] + '.json')
+        //let taskProject = await this.get('issues/' + taskNumbers[0] + '.json')
         //let project = await this.get('projects/' + taskProject.issue.project.id + '.json')
         let user_id = this.getUserIdByGHLogin(assignTo)
 
@@ -76,6 +76,7 @@ class Redmine {
             if (assignTo != null) {
                 payload["issue"]["assigned_to_id"] = user_id
             }
+            console.log(payload)
             await this.put('issues/' + taskId + '.json', payload)
         }
     }
