@@ -112,6 +112,7 @@ class Redmine {
                     notes: comment || ''
                 }
             }
+            
             if (assignTo != null) {
                 payload["issue"]["assigned_to_id"] = user_id
             }
