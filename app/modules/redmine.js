@@ -96,13 +96,15 @@ class Redmine {
     async setStatusWork(taskNumbers, comment, assignTo = null) {
         var user_id = 0
         if (assignTo != null) {
-            let url = 'stat?token=' + this.statToken + '&search=' + assignTo
-            const response = await axios.get(this.statHost + url)
-            response.data.forEach(u => {
+            let url = this.statHost + 'stat?token=' + this.statToken + '&search=' + assignTo
+            console.log(url)
+            const response = await axios.get(url)
+            for (let u of response.data) {
                 if (u.GitHub == assignTo) {
                     user_id = u.Id
+                    break
                 }
-            }); 
+            }
         }
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
@@ -112,7 +114,7 @@ class Redmine {
                     notes: comment || ''
                 }
             }
-            
+
             if (assignTo != null) {
                 payload["issue"]["assigned_to_id"] = user_id
             }
