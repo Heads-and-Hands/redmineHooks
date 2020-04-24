@@ -52,7 +52,7 @@ router.post('/', async function (req, res, next) {
   } else if (event == "push") {
     commits = payload.commits
     for (let commit of commits) {
-      let tasks = value.commit.message.match(/#\d+/g)
+      let tasks = commit.message.match(/#\d+/g)
       if (tasks) {
         taskNumbers += tasks.join([])
       }      
@@ -79,7 +79,7 @@ router.post('/', async function (req, res, next) {
   }
   console.log(logDb);
   res.json(logDb);  
-  
+
 
   switch (event) {
     case 'push':
