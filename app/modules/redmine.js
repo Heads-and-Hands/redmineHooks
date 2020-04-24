@@ -99,6 +99,7 @@ class Redmine {
         if (assignTo != null) {
             let url = this.statHost + 'stat?token=' + this.statToken + '&search=' + assignTo
             try {
+                console.log(url)
                 const response = await axios.get(url)
             } catch {
                 console.log(error.response.status, error.response.statusText)
