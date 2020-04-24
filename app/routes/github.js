@@ -79,6 +79,7 @@ router.post('/', async function (req, res, next) {
   }
   console.log(logDb);
   res.json(logDb);  
+  
 
   switch (event) {
     case 'push':
