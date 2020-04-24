@@ -5,7 +5,10 @@ class Redmine {
     constructor(key) {
         this.key = key
         this.host = 'https://pm.handh.ru/'
+
         this.statHost = 'https://stat.handh.ru:9898/'
+        this.statToken = 'keddva5rd'
+
         this.readyStatus = false
         this.reviewStatus = false
         this.completeStatus = false
@@ -91,6 +94,16 @@ class Redmine {
     }
 
     async setStatusWork(taskNumbers, comment, assignTo = null) {
+        var user_id = 0
+        if (assignTo != null) {
+            let url = 'stat?token=' + this.statToken + '&search=' + assignTo
+            const response = await axios.get(this.statHost + url)
+            response.data.forEach(u => {
+                if (u.GitHub == assignTo) {
+                    user_id = u.Id
+                }
+            }); 
+        }
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
             let payload = {
@@ -100,18 +113,9 @@ class Redmine {
                 }
             }
             if (assignTo != null) {
-                let users = await this.get('issues/' + taskNumbers[0] + '.json?include=journals')
-                var user_id = 0
-                let url = 'stat?token=keddva5rd&search=' + assignTo
-                const response = await axios.get(this.statHost + url)
-                response.data.forEach(u => {
-                    if (u.GitHub == assignTo) {
-                        user_id = u.Id
-                    }
-                }); 
-
                 payload["issue"]["assigned_to_id"] = user_id
             }
+            console.log('issues/' + taskId + '.json\n' + payload)
             await this.put('issues/' + taskId + '.json', payload)
         }
     }
