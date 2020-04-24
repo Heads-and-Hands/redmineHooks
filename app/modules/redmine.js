@@ -100,15 +100,15 @@ class Redmine {
             let url = this.statHost + 'users?token=' + this.statToken + '&search=' + assignTo
             try {
                 console.log(url)
-                const response = await axios.get(url)
+                let response = await axios.get(url)
+                for (let u of response.data) {
+                    if (u.GitHub == assignTo) {
+                        user_id = u.Id
+                        break
+                    }
+                }
             } catch {
                 console.log(error.response.status, error.response.statusText)
-            }
-            for (let u of response.data) {
-                if (u.GitHub == assignTo) {
-                    user_id = u.Id
-                    break
-                }
             }
         }
         for (let taskId of taskNumbers) {
