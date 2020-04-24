@@ -126,6 +126,7 @@ class Redmine {
                 console.log(error.response.status, error.response.statusText)
             }
         }
+        console.log("user by gh: " + user_id) 
         return user_id
     }
 
