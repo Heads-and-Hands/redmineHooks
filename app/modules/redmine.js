@@ -5,6 +5,7 @@ class Redmine {
     constructor(key) {
         this.key = key
         this.host = 'https://pm.handh.ru/'
+        this.statHost = 'https://stat.handh.ru:9898/'
         this.readyStatus = false
         this.reviewStatus = false
         this.completeStatus = false
@@ -89,7 +90,7 @@ class Redmine {
         }
     }
 
-    async setStatusWork(taskNumbers, comment, needAssign = true) {
+    async setStatusWork(taskNumbers, comment, assignTo = null) {
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
             let payload = {
@@ -98,19 +99,18 @@ class Redmine {
                     notes: comment || ''
                 }
             }
-            if (needAssign) {
-                let task = await this.get('issues/' + taskNumbers[0] + '.json?include=journals')
-                const user = task.issue.journals.pop().user
-                let journals = task.issue.journals.reverse()
-                let userDetail = false
-                for (const note of journals) {
-                    const detail = note.details.find(item => item.name === 'status_id' && item.new_value == this.workStatus)
-                    userDetail = note.details.find(item => item.name === 'assigned_to_id')
-                    if (detail && userDetail) {
-                        break
+            if (assignTo != null) {
+                let users = await this.get('issues/' + taskNumbers[0] + '.json?include=journals')
+                var user_id = 0
+                let url = 'stat?token=keddva5rd&search=' + assignTo
+                const response = await axios.get(this.statHost + url)
+                response.data.forEach(u => {
+                    if (u.GitHub == assignTo) {
+                        user_id = u.Id
                     }
-                }
-                payload["issue"]["assigned_to_id"] = userDetail.new_value ? userDetail.new_value : user.id
+                }); 
+
+                payload["issue"]["assigned_to_id"] = user_id
             }
             await this.put('issues/' + taskId + '.json', payload)
         }

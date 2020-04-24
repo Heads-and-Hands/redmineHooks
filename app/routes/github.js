@@ -51,7 +51,8 @@ router.post('/', async function (req, res, next) {
 
   switch (event) {
     case 'push':
-      redmine.setStatusWork(taskNumbers, "", needAssign)
+      let assignTo = needAssign ? payload.pusher.name : null
+      redmine.setStatusWork(taskNumbers, "", assignTo)
       break;
     case 'pull_request':
       switch (action) {
@@ -62,17 +63,22 @@ router.post('/', async function (req, res, next) {
         case 'review_requested':
           redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
           break;
-        case 'closed':
-          redmine.checkTaskStatus(taskNumbers)
-          redmine.setStatusReadyBuild(taskNumbers)
-          break;
+        // case 'closed':
+          // redmine.checkTaskStatus(taskNumbers)
+          // redmine.setStatusReadyBuild(taskNumbers)
+          // break;
         default:
       }
       break
     case 'pull_request_review':
+      action = payload.review.state
       switch (action) {
         case 'changes_requested':
           redmine.setStatusWork(taskNumbers, payload.review.body, needAssign)
+          break;
+        case 'approved':
+          redmine.checkTaskStatus(taskNumbers)
+          redmine.setStatusReadyBuild(taskNumbers)
           break;
         default:
       }
