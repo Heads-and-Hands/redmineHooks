@@ -57,7 +57,7 @@ router.post('/', async function (req, res, next) {
         taskNumbers += tasks.join([])
       }      
     }
-    
+
     let task = payload.ref.split('feature/')[1].match(/\d+/g);
     let featureTask = task[0];
     if (featureTask) {
@@ -81,10 +81,10 @@ router.post('/', async function (req, res, next) {
   console.log(logDb);
   res.json(logDb);  
 
-
   switch (event) {
     case 'push':
-      let assignTo = needAssign ? author : null
+      var assignTo = null
+      if (needAssign == true) assignTo = author
       redmine.setStatusWork(taskNumbers, "", assignTo)
       break;
     case 'pull_request':
