@@ -22,6 +22,7 @@ router.post('/', async function (req, res, next) {
     case 'pull_request_review':
       break;
     default:
+      res.json({})
       return
   }
   
@@ -84,7 +85,9 @@ router.post('/', async function (req, res, next) {
   switch (event) {
     case 'push':
       var assignTo = null
-      if (needAssign == true) assignTo = author
+      if (needAssign == true) {
+        assignTo = author
+      }
       redmine.setStatusWork(taskNumbers, "", assignTo)
       break;
     case 'pull_request':
