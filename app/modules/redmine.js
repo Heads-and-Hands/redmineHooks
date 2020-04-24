@@ -97,7 +97,7 @@ class Redmine {
         console.log("setStatusWorkAndAssignTo: " + assignTo)
         var user_id = 0
         if (assignTo != null) {
-            let url = this.statHost + 'stat?token=' + this.statToken + '&search=' + assignTo
+            let url = this.statHost + 'users?token=' + this.statToken + '&search=' + assignTo
             try {
                 console.log(url)
                 const response = await axios.get(url)
