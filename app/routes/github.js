@@ -57,6 +57,7 @@ router.post('/', async function (req, res, next) {
         taskNumbers += tasks.join([])
       }      
     }
+    
     let task = payload.ref.split('feature/')[1].match(/\d+/g);
     let featureTask = task[0];
     if (featureTask) {
