@@ -111,7 +111,7 @@ router.post('/', async function (req, res, next) {
           redmine.setStatusWork(taskNumbers, payload.review.body, assignTo)
           break;
         case 'approved':
-          redmine.checkTaskStatus(taskNumbers)
+          //redmine.checkTaskStatus(taskNumbers)
           redmine.setStatusReadyBuild(taskNumbers)
           break;
         default:
