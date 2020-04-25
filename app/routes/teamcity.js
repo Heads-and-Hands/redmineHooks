@@ -10,7 +10,7 @@ var dbo = require('../modules/db')
 var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
-    let payload = JSON.parse(req.body.payload)
+    let payload = JSON.parse(req.body)
     console.log(payload)
     res.json({})
 
