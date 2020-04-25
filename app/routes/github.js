@@ -105,7 +105,10 @@ router.post('/', async function (req, res, next) {
       action = payload.review.state
       switch (action) {
         case 'changes_requested':
-          redmine.setStatusWork(taskNumbers, payload.review.body, needAssign)
+          if (needAssign == true) {
+            assignTo = payload.pull_request.user.login
+          }          
+          redmine.setStatusWork(taskNumbers, payload.review.body, assignTo)
           break;
         case 'approved':
           redmine.checkTaskStatus(taskNumbers)

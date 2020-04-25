@@ -110,16 +110,14 @@ class Redmine {
         }
     }
 
-    async getUserIdByGHLogin(login) {
-        var user_id = 0
+    async getUserIdByGHLogin(login) {        
         if (login != null) {
             let url = this.statHost + 'users?token=' + this.statToken + '&search=' + login
             try {
                 let response = await axios.get(url)
                 for (let u of response.data) {
                     if (u.GitHub == login) {
-                        user_id = u.Id
-                        break
+                        return u.Id
                     }
                 }
             } catch {
@@ -127,7 +125,7 @@ class Redmine {
             }
         }
         console.log("user by gh: " + user_id) 
-        return user_id
+        return 0
     }
 
     async bitriseHook(projectName, buildNumber, needAssign = true) {
