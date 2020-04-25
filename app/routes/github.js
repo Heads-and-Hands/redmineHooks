@@ -100,7 +100,7 @@ router.post('/', async function (req, res, next) {
           break;
         default:
       }
-      break
+      break;
     case 'pull_request_review':
       state = payload.review.state
       switch (state) {
