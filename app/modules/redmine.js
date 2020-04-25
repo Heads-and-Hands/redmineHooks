@@ -60,7 +60,6 @@ class Redmine {
 
     async setStatusReviewAndTl(taskNumbers, comment, assignTo = null) {
         console.log("setStatusReviewAndTl: " + assignTo)
-
         //let taskProject = await this.get('issues/' + taskNumbers[0] + '.json')
         //let project = await this.get('projects/' + taskProject.issue.project.id + '.json')
         let user_id = await this.getUserIdByGHLogin(assignTo)
@@ -81,14 +80,20 @@ class Redmine {
         }
     }
 
-    async setStatusReadyBuild(taskNumbers) {
+    async setStatusReadyBuild(taskNumbers, assignTo = null) {
+        console.log("setStatusReadyBuild: " + assignTo)
+        let user_id = await this.getUserIdByGHLogin(assignTo)
+        let payload = {
+            issue: {
+                status_id: this.readyStatus
+            }
+        }
+        if (assignTo != null) {
+            payload["issue"]["assigned_to_id"] = user_id
+        }
         for (let taskId of taskNumbers) {
             await this.checkOnNewStatus(taskId)
-            await this.put('issues/' + taskId + '.json', {
-                issue: {
-                    status_id: this.readyStatus
-                }
-            })
+            await this.put('issues/' + taskId + '.json', payload)
         }
     }
 
