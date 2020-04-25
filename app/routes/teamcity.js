@@ -11,7 +11,7 @@ var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
     //let payload = JSON.parse(req.body)
-    console.log(req)
+    console.log(req.body)
     res.json({})
 
     let q = qs.parse(req.url.split('?')[1])
