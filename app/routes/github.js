@@ -32,7 +32,7 @@ router.post('/', async function (req, res, next) {
 
   let commits = false
   let taskNumbers = []
-  if (event == "pull_request") {
+  if (event == "pull_request" || event == 'pull_request_review') {
     try {
       commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
       commits = commits.data
@@ -115,7 +115,6 @@ router.post('/', async function (req, res, next) {
           if (needAssign == true) {
             assignTo = payload.pull_request.user.login
           }          
-          console.log(payload.pull_request.user.login)
           redmine.setStatusReadyBuild(taskNumbers, assignTo)
           break;
         default:
