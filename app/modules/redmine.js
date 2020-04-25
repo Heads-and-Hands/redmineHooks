@@ -114,6 +114,7 @@ class Redmine {
             await this.put('issues/' + taskId + '.json', payload)
         }
     }
+    
 
     async getUserIdByGHLogin(login) {        
         if (login != null) {
