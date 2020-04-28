@@ -11,6 +11,7 @@ const key = process.env;
 var indexRouter = require('./routes/index')
 var githubRouter = require('./routes/github')
 var bitriseRouter = require('./routes/bitrise')
+var teamcityRouter = require('./routes/teamcity')
 var resultsRouter = require('./routes/result')
 
 var app = express()
@@ -41,14 +42,14 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/', indexRouter)
 app.use('/github', githubRouter)
 app.use('/bitrise', bitriseRouter)
+app.use('/teamcity', teamcityRouter)
 
 let users = {}
-users[key.ADMIN_NAME] = key.ADMIN_NAME
+users[key.ADMIN_NAME] = key.ADMIN_PASS
 app.use(basicAuth({
   users: users,
   challenge: true
 }))
-
 app.use('/results', resultsRouter)
 
 // catch 404 and forward to error handler
