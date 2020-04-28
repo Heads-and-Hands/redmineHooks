@@ -11,7 +11,7 @@ const key = process.env;
 var indexRouter = require('./routes/index')
 var githubRouter = require('./routes/github')
 var bitriseRouter = require('./routes/bitrise')
-var teamcityRouter = require('./routes/teamcity')
+//var teamcityRouter = require('./routes/teamcity')
 var resultsRouter = require('./routes/result')
 
 var app = express()
