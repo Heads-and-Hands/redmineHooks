@@ -42,7 +42,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/', indexRouter)
 app.use('/github', githubRouter)
 app.use('/bitrise', bitriseRouter)
-app.use('/teamcity', teamcityRouter)
+//app.use('/teamcity', teamcityRouter)
 
 let users = {}
 users[key.ADMIN_NAME] = key.ADMIN_PASS
