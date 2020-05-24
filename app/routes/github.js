@@ -41,12 +41,14 @@ router.post('/', async function (req, res, next) {
       }
     }
 
-    let task = req.body.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
-    let featureTask = task[0];
-
-    if (featureTask) {
-      featureTask = '#' + featureTask
-      taskNumbers += featureTask
+    let branchs = payload.ref.split('feature/') 
+    if (branchs.length > 0) {
+      let task = payload.ref.split('feature/')[1].match(/\d+/g);
+      let featureTask = task[0];
+      if (featureTask) {
+        featureTask = '#' + featureTask
+        taskNumbers += featureTask
+      }
     }
 
     if (taskNumbers.length !== 0) {
