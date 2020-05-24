@@ -61,7 +61,7 @@ router.post('/', async function (req, res, next) {
     }
 
     let branchs = payload.ref.split('feature/')
-    if (branchs.length > 0) {
+    if (branchs.length > 1) {
       let task = branchs[1].match(/\d+/g);
       let featureTask = task[0];
       if (featureTask) {
