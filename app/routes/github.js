@@ -11,81 +11,125 @@ var dbo = require('./../modules/db')
 var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
-  let logDb = {
-    date: new Date(),
-    type: '',
-    author: '',
-    tasks: '',
-    project: ''
+
+  let needAssign = !req.query.assign ? true : (req.query.assign == 'true')
+  let event = req.header('X-GitHub-Event')
+  let payload = JSON.parse(req.body.payload)
+
+  switch (event) {
+    case 'push':
+    case 'pull_request':
+    case 'pull_request_review':
+      break;
+    default:
+      res.json({})
+      return
   }
-  res.send(req.body.pull_request);
-  if (req.body.pull_request !== undefined) {
-    fs.appendFile('./log-request.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(req.body) + "\r\n\n", () => {
-    });
-    let commits = false
+  
+  let action = payload.action
+  let author = payload.sender.login
+  var assignTo = null
+
+  let commits = false
+  let taskNumbers = []
+  if (event == "pull_request" || event == 'pull_request_review') {
     try {
-      commits = await axios(req.body.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
-    } catch (error) {
-      console.log(error.response.status, error.response.statusText)
-    }
-
-    let needAssign = !req.query.assign ? false : req.query.assign
-
-    let taskNumbers = []
-    if (commits.data) {
-      for (let value of commits.data) {
+      commits = await axios(payload.pull_request.commits_url.replace('api.github.com', keyGithub + '@api.github.com'))
+      commits = commits.data
+      for (let value of commits) {
         let tasks = value.commit.message.replace('pull request #', '').match(/#\d+/g)
         if (tasks) {
           taskNumbers += tasks.join([])
         }
       }
-    }
-
-    let branchs = payload.ref.split('feature/') 
-    if (branchs.length > 0) {
-      let task = payload.ref.split('feature/')[1].match(/\d+/g);
+      let task = payload.pull_request.head.ref.split('feature/')[1].match(/\d+/g);
       let featureTask = task[0];
       if (featureTask) {
         featureTask = '#' + featureTask
         taskNumbers += featureTask
-      }
-    }
-
-    if (taskNumbers.length !== 0) {
-      taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
-      logDb.tasks = taskNumbers.join()
-      logDb.project = req.body.pull_request.head.repo.name
-      if (req.body.action === 'opened' || req.body.action === 'synchronize') {
-        logDb.type = 'pr ' + req.body.action
-        redmine.setStatusReviewAndTl(taskNumbers, "", needAssign)
-      } else if (req.body.action === 'closed') {
-        logDb.type = 'pr closed'
-        redmine.checkTaskStatus(taskNumbers)
-        redmine.setStatusReadyBuild(taskNumbers)
-      } else if (req.body.action === 'submitted' && req.body.review.user.login !== 'handhci') {
-        logDb.type = 'pr submitted'
-        redmine.setStatusWork(taskNumbers, req.body.review.body, needAssign)
-      }
-    } else {
-      logDb.type = 'no found task number'
-    }
-    if (!logDb.type) {
-      logDb.type = 'pr ' + req.body.action + ' (no action)'
-    }
-    try {
-      logDb.author = req.body.hasOwnProperty('user') ? req.body.review.user.login : req.body.sender.login
+      }      
     } catch (error) {
-
+      console.log(error.response.status, error.response.statusText)
+    }  
+  } else if (event == "push") {
+    commits = payload.commits
+    for (let commit of commits) {
+      let tasks = commit.message.match(/#\d+/g)
+      if (tasks) {
+        taskNumbers += tasks.join([])
+      }      
     }
-    Result.create(logDb, function (err, doc) {
-      if (err) throw err;
-    })
-  } else {
 
+    let branchs = payload.ref.split('feature/')
+    if (branchs.length > 0) {
+      let task = branchs[1].match(/\d+/g);
+      let featureTask = task[0];
+      if (featureTask) {
+        featureTask = '#' + featureTask
+        taskNumbers += featureTask
+      }     
+    }
+  }
+  if (taskNumbers.length !== 0) {
+    taskNumbers = taskNumbers.split('#').filter((v, i, a) => v && a.indexOf(v) === i)
+  }  
+
+  let logDb = {
+    date: new Date(),
+    author: author,
+    tasks: taskNumbers.join(),
+    project: payload.pull_request ? payload.pull_request.head.repo.name : '',
+    event: event,
+    action: action,
+    needAssign: needAssign
+  }
+  console.log(logDb);
+  res.json(logDb);  
+
+  switch (event) {
+    case 'push':
+      if (needAssign == true) {
+        assignTo = author
+      }
+      redmine.setStatusWork(taskNumbers, "", assignTo)
+      break;
+    case 'pull_request':
+      switch (action) {
+        case 'review_requested':
+          if (needAssign == true) {
+            assignTo = payload.pull_request.requested_reviewers[0].login
+          }
+          redmine.setStatusReviewAndTl(taskNumbers, "", assignTo)
+          break;
+        default:
+      }
+      break;
+    case 'pull_request_review':
+      state = payload.review.state
+      switch (state) {
+        case 'changes_requested':
+          if (needAssign == true) {
+            assignTo = payload.pull_request.user.login
+          }          
+          redmine.setStatusWork(taskNumbers, payload.review.body, assignTo)
+          break;
+        case 'approved':
+          //redmine.checkTaskStatus(taskNumbers)          
+          if (needAssign == true) {
+            assignTo = payload.pull_request.user.login
+          }          
+          redmine.setStatusReadyBuild(taskNumbers, assignTo)
+          break;
+        default:
+      }
+      break
+    default:
   }
 
-  fs.appendFile('./log-result.txt', log + "\r\n\n", ()=>{})
-  res.send('end github')
+  Result.create(logDb, function (err, doc) {
+    if (err) throw err;
+  })
+  //fs.appendFile('./log-result.txt', JSON.stringify(logDb)+ "\r\n\n", ()=>{})  
 });
 
 module.exports = router;
