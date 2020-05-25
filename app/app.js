@@ -54,7 +54,7 @@ app.use('/results', resultsRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  console.log("404: " + req)
+  console.log("404: " + res)
   next(createError(404))
 })
 
