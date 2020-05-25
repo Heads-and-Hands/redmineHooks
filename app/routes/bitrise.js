@@ -10,22 +10,21 @@ var dbo = require('./../modules/db')
 var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
 router.post('/', async function (req, res, next) {
-    let q = qs.parse(req.url.split('?')[1])
-    let reqParsed = req.body
     let logDb = {
         date: new Date(),
         type: '',
         project: '',
         buildNumber: ''
     }
-    fs.appendFile('./log-bitrise.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(reqParsed) + "\r\n\n", () => {
-    })
+
+    let project = req.query.project
+    let reqParsed = req.body
     if (reqParsed.build_status === 1 && (reqParsed.git.src_branch === 'develop' && reqParsed.git.dst_branch === 'develop') || (reqParsed.git.dst_branch.split("/")[0] === 'release' && reqParsed.git.src_branch.split("/")[0] === 'release')) {
         logDb.type = 'bitrise build'
-        logDb.project = q.project
+        logDb.project = project
         logDb.buildNumber = reqParsed.build_number
         let needAssign = !req.query.assign ? false : req.query.assign
-        let tasks = await redmine.bitriseHook(q.project, reqParsed.build_number, needAssign)
+        let tasks = await redmine.bitriseHook(project, reqParsed.build_number, needAssign)
         logDb.tasks = tasks.join()
         Result.create(logDb, function (err, doc) {
             if (err) throw err;
@@ -33,9 +32,11 @@ router.post('/', async function (req, res, next) {
     } else {
 
     }
-
-    //fs.appendFile('./log-bitrise.txt', log + "\r\n\n", () => {})
-    res.send('bitrise end')
+    console.log(logDb);
+    res.json(logDb); 
+    
+    fs.appendFile('./log-bitrise.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(reqParsed) + "\r\n\n", () => {
+    })    
 })
 
 module.exports = router
