@@ -39,7 +39,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 //   }
 // })
 app.use(function (req, res, next) {
-  console.log(req.originalUrl)
+  console.log("req: " + req.method + " " + req.originalUrl)
 })
 
 app.use('/', indexRouter)
