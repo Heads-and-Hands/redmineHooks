@@ -158,7 +158,10 @@ class Redmine {
                 if (needAssign) {
                     payload["issue"]["assigned_to_id"] = tester.value
                 }
-                await this.put('issues/' + issue.id + '.json', payload)
+                let issueUrl = 'issues/' + issue.id + '.json'
+                console.log(issueUrl)
+                console.log(payload)
+                await this.put(issueUrl, payload)
             }
         } else {
             console.log('no issues')
