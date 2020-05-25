@@ -143,6 +143,7 @@ class Redmine {
                 return true
             }
         })
+        const promises = []
         if (issues.issues.length) {
             for (let issue of issues.issues) {
                 issuesIds.push(issue.id)
@@ -159,13 +160,16 @@ class Redmine {
                     payload["issue"]["assigned_to_id"] = tester.value
                 }
                 let issueUrl = 'issues/' + issue.id + '.json'
-                // console.log(issueUrl)
+                //console.log(issueUrl)
                 // console.log(payload)
-                await this.put(issueUrl, payload)
+                promises.push(this.put(issueUrl, payload))
+                //await this.put(issueUrl, payload)
             }
+            await Promise.all(promises);
         } else {
             console.log('no issues')
         }
+
         return issuesIds
     }
 
