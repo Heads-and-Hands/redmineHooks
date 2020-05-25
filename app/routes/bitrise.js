@@ -35,8 +35,8 @@ router.post('/', async function (req, res, next) {
     Result.create(logDb, function (err, doc) {
         if (err) throw err;
     })    
-    fs.appendFile('./log-bitrise.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(reqParsed) + "\r\n\n", () => {
-    })    
+    // fs.appendFile('./log-bitrise.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(reqParsed) + "\r\n\n", () => {
+    // })   
 })
 
 module.exports = router
