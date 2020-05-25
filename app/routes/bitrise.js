@@ -23,7 +23,7 @@ router.post('/', async function (req, res, next) {
         logDb.type = 'bitrise build'
         logDb.project = project
         logDb.buildNumber = reqParsed.build_number
-        let needAssign = !req.query.assign ? false : req.query.assign
+        let needAssign = req.query.assign == 'false' ? false : req.query.assign
         let tasks = await redmine.bitriseHook(project, reqParsed.build_number, needAssign)
         logDb.tasks = tasks.join()
         Result.create(logDb, function (err, doc) {
