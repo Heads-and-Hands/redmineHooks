@@ -38,6 +38,9 @@ app.use(express.static(path.join(__dirname, 'public')))
 //     next()
 //   }
 // })
+app.use(function (req, res, next) {
+  console.log(req)
+})
 
 app.use('/', indexRouter)
 app.use('/github', githubRouter)
@@ -54,7 +57,6 @@ app.use('/results', resultsRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  console.log(req.originalUrl)
   next(createError(404))
 })
 
