@@ -26,13 +26,14 @@ router.post('/', async function (req, res, next) {
         let needAssign = !req.query.assign ? true : (req.query.assign == 'true')
         let tasks = await redmine.bitriseHook(project, reqParsed.build_number, needAssign)
         logDb.tasks = tasks.join()
+        console.log(logDb);
         Result.create(logDb, function (err, doc) {
             if (err) throw err;
         })
     } else {
 
     }
-    console.log(logDb);
+    
     res.json(logDb); 
     
     fs.appendFile('./log-bitrise.txt', new Date() + "\r\n" + req.url + ' ' + JSON.stringify(reqParsed) + "\r\n\n", () => {
