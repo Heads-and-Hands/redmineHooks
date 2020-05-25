@@ -38,10 +38,11 @@ app.use(express.static(path.join(__dirname, 'public')))
 //     next()
 //   }
 // })
-app.use(function (req, res, next) {
-  console.log("req: " + req.method + " " + req.originalUrl)
-  next()
-})
+
+// app.use(function (req, res, next) {
+  // console.log("req: " + req.method + " " + req.originalUrl)
+  // next()
+// })
 
 app.use('/', indexRouter)
 app.use('/github', githubRouter)
