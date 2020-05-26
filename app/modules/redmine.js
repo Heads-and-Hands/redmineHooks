@@ -99,23 +99,29 @@ class Redmine {
 
     async setStatusWork(taskNumbers, comment, assignTo = null) {
         console.log("setStatusWorkAndAssignTo: " + assignTo)
+
+        const promises = []
         for (let taskId of taskNumbers) {
-            await this.checkOnNewStatus(taskId)
-            let payload = {
-                issue: {
-                    status_id: this.workStatus,
-                    notes: comment || ''
+            let taskInRedmine = await this.get('issues/' + taskId + '.json')
+            if (taskInRedmine.issue.status.id != this.completeStatus) {
+                // хз зачем это, пока закомментил
+                //await this.checkOnNewStatus(taskId)
+                let payload = {
+                    issue: {
+                        status_id: this.workStatus,
+                        notes: comment || ''
+                    }
                 }
+                if (assignTo != null) {
+                    let user_id = await this.getUserIdByGHLogin(assignTo)
+                    payload["issue"]["assigned_to_id"] = user_id
+                }
+                promises.push(this.put('issues/' + taskId + '.json', payload))
             }
-            if (assignTo != null) {
-                let user_id = await this.getUserIdByGHLogin(assignTo)
-                payload["issue"]["assigned_to_id"] = user_id
-            }
-            await this.put('issues/' + taskId + '.json', payload)
         }
+        await Promise.all(promises);
     }
     
-
     async getUserIdByGHLogin(login) {        
         if (login != null) {
             let url = this.statHost + 'users?token=' + this.statToken + '&search=' + login
@@ -134,15 +140,15 @@ class Redmine {
         return 0
     }
 
-    async bitriseHook(projectName, buildNumber, needAssign = true) {
+    async setStatusComplete(projectName, buildNumber, needAssign = true) {
         let project = await this.get('projects/' + projectName + '.json')
-        let issues = await this.get('issues.json?project_id=' + project.project.id + '&status_id=' + this.readyStatus)
-        let issuesIds = []
+        let issues = await this.get('issues.json?project_id=' + project.project.id + '&status_id=' + this.readyStatus)        
         let tester = project.project.custom_fields.find(function (element) {
             if (element.name && element.name === 'Тестировщик') {
                 return true
             }
         })
+        const issuesIds = []
         const promises = []
         if (issues.issues.length) {
             for (let issue of issues.issues) {
