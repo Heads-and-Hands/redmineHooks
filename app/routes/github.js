@@ -91,7 +91,12 @@ router.post('/', async function (req, res, next) {
       if (needAssign == true) {
         assignTo = author
       }
-      redmine.setStatusWork(taskNumbers, "", assignTo)
+      if (payload.ref == 'refs/heads/develop'){
+        redmine.setStatusReadyBuild(taskNumbers, assignTo)
+      } else {
+        redmine.setStatusWork(taskNumbers, payload.head_commit.message, assignTo)
+      }
+      
       break;
     case 'pull_request':
       switch (action) {
@@ -99,7 +104,7 @@ router.post('/', async function (req, res, next) {
           if (needAssign == true) {
             assignTo = payload.pull_request.requested_reviewers[0].login
           }
-          redmine.setStatusReviewAndTl(taskNumbers, "", assignTo)
+          redmine.setStatusReview(taskNumbers, "", assignTo)
           break;
         default:
       }
@@ -114,11 +119,12 @@ router.post('/', async function (req, res, next) {
           redmine.setStatusWork(taskNumbers, payload.review.body, assignTo)
           break;
         case 'approved':
+          // Не понятно зачем это
           //redmine.checkTaskStatus(taskNumbers)          
-          if (needAssign == true) {
-            assignTo = payload.pull_request.user.login
-          }          
-          redmine.setStatusReadyBuild(taskNumbers, assignTo)
+          
+          // не надо. Будет делать это по пушу в develop
+          // if (needAssign == true) { assignTo = payload.pull_request.user.login }          
+          // redmine.setStatusReadyBuild(taskNumbers, assignTo)
           break;
         default:
       }

@@ -58,26 +58,35 @@ class Redmine {
         }
     }
 
-    async setStatusReviewAndTl(taskNumbers, comment, assignTo = null) {
+    async setStatusReview(taskNumbers, comment, assignTo = null) {
         console.log("setStatusReviewAndTl: " + assignTo)
         //let taskProject = await this.get('issues/' + taskNumbers[0] + '.json')
         //let project = await this.get('projects/' + taskProject.issue.project.id + '.json')
 
-        for (let taskId of taskNumbers) {
-            await this.checkOnNewStatus(taskId)
-            let payload = {
-                issue: {
-                    status_id: this.reviewStatus,
-                    notes: comment || ''
-                }
+        let payload = {
+            issue: {
+                status_id: this.reviewStatus,
+                notes: comment || ''
             }
-            if (assignTo != null) {
-                let user_id = await this.getUserIdByGHLogin(assignTo)
-                payload["issue"]["assigned_to_id"] = user_id
-            }
-            console.log(payload)
-            await this.put('issues/' + taskId + '.json', payload)
+        }        
+        if (assignTo != null) {
+            let user_id = await this.getUserIdByGHLogin(assignTo)     
+            payload["issue"]["assigned_to_id"] = user_id
         }
+        const promises = []
+        const promisesPre = []
+        for (let taskId of taskNumbers) {
+            let taskInRedmine = await this.get('issues/' + taskId + '.json')
+            // В ревью берем только задачи новые и в работе
+            if (taskInRedmine.issue.status.id == this.newStatus || taskInRedmine.issue.status.id == this.workStatus) {
+                // сначала задачи ставим в работе, чтоб ремдайн дал их поставить в ревью
+                promisesPre.push(this.checkOnNewStatus(taskId))
+
+                promises.push(this.put('issues/' + taskId + '.json', payload))
+            }   
+        }
+        await Promise.all(promisesPre);
+        await Promise.all(promises);
     }
 
     async setStatusReadyBuild(taskNumbers, assignTo = null) {
@@ -91,31 +100,44 @@ class Redmine {
             let user_id = await this.getUserIdByGHLogin(assignTo)
             payload["issue"]["assigned_to_id"] = user_id
         }
+
+        const promisesPre = []
+        const promises = []
         for (let taskId of taskNumbers) {
-            await this.checkOnNewStatus(taskId)
-            await this.put('issues/' + taskId + '.json', payload)
+            let taskInRedmine = await this.get('issues/' + taskId + '.json')
+            // В сборку берем только задачи новые, в работе и на ревью
+            if (taskInRedmine.issue.status.id == this.newStatus || taskInRedmine.issue.status.id == this.workStatus
+            || taskInRedmine.issue.status.id == this.reviewStatus) {
+                // Прежде чем перевести в сборку ставим статус ревью
+                promisesPre.push(this.checkOnReviewStatus(taskId))
+
+                promises.push(this.put('issues/' + taskId + '.json', payload))
+            }
         }
+        await Promise.all(promisesPre);
+        await Promise.all(promises);
     }
 
     async setStatusWork(taskNumbers, comment, assignTo = null) {
         console.log("setStatusWorkAndAssignTo: " + assignTo)
 
+        let payload = {
+            issue: {
+                status_id: this.workStatus,
+                notes: comment || ''
+            }
+        }
+        if (assignTo != null) {
+            let user_id = await this.getUserIdByGHLogin(assignTo)
+            payload["issue"]["assigned_to_id"] = user_id
+        }
         const promises = []
         for (let taskId of taskNumbers) {
             let taskInRedmine = await this.get('issues/' + taskId + '.json')
-            if (taskInRedmine.issue.status.id != this.completeStatus) {
+            // В работу переводим только новые задачи
+            if (taskInRedmine.issue.status.id == this.newStatus) {
                 // хз зачем это, пока закомментил
                 //await this.checkOnNewStatus(taskId)
-                let payload = {
-                    issue: {
-                        status_id: this.workStatus,
-                        notes: comment || ''
-                    }
-                }
-                if (assignTo != null) {
-                    let user_id = await this.getUserIdByGHLogin(assignTo)
-                    payload["issue"]["assigned_to_id"] = user_id
-                }
                 promises.push(this.put('issues/' + taskId + '.json', payload))
             }
         }
@@ -148,28 +170,26 @@ class Redmine {
                 return true
             }
         })
+        let payload = {
+            issue: {
+                status_id: this.completeStatus,
+                custom_field_values: {
+                    '32': buildNumber
+                },
+                notes: 'Build: ' + buildNumber
+            }
+        }
+        if (needAssign) {
+            payload["issue"]["assigned_to_id"] = tester.value
+        }
+        let issueUrl = 'issues/' + issue.id + '.json'
+
         const issuesIds = []
         const promises = []
         if (issues.issues.length) {
             for (let issue of issues.issues) {
                 issuesIds.push(issue.id)
-                let payload = {
-                    issue: {
-                        status_id: this.completeStatus,
-                        custom_field_values: {
-                            '32': buildNumber
-                        },
-                        notes: 'Build: ' + buildNumber
-                    }
-                }
-                if (needAssign) {
-                    payload["issue"]["assigned_to_id"] = tester.value
-                }
-                let issueUrl = 'issues/' + issue.id + '.json'
-                //console.log(issueUrl)
-                // console.log(payload)
                 promises.push(this.put(issueUrl, payload))
-                //await this.put(issueUrl, payload)
             }
             await Promise.all(promises);
         } else {
@@ -189,6 +209,17 @@ class Redmine {
             })
         }
     }
+
+    async checkOnReviewStatus(taskId) {
+        let taskInRedmine = await this.get('issues/' + taskId + '.json')
+        if (taskInRedmine.issue.status.id === this.workStatus) {
+            await this.put('issues/' + taskId + '.json', {
+                issue: {
+                    status_id: this.reviewStatus,
+                }
+            })
+        }
+    }    
 
     async checkTaskStatus(taskNumbers) {
         for (let taskId of taskNumbers) {
