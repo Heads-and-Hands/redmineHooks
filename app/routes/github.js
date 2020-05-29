@@ -54,7 +54,8 @@ router.post('/', async function (req, res, next) {
   } else if (event == "push") {
     commits = payload.commits
     for (let commit of commits) {
-      let tasks = commit.message.match(/#\d+/g)
+      // Делаем replace чтоб достать номер задачи из смердженной ветки
+      let tasks = commit.message.replace('from Heads-and-Hands/feature/68119', '#').match(/#\d+/g)
       if (tasks) {
         taskNumbers += tasks.join([])
       }      
