@@ -197,9 +197,9 @@ class Redmine {
             for (let issue of issues.issues) {
                 issuesIds.push(issue.id)
                 let issueUrl = 'issues/' + issue.id + '.json'
-                promises.push(this.put(issueUrl, payload))
+                await this.put(issueUrl, payload)
             }
-            await Promise.all(promises);
+            //await Promise.all(promises);
         } else {
             console.log('no issues')
         }
