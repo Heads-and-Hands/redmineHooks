@@ -19,12 +19,15 @@ router.post('/', async function (req, res, next) {
 
     let project = req.query.project
     let reqParsed = req.body
-    if (reqParsed.build_status === 1 && (reqParsed.git.src_branch === 'develop' && reqParsed.git.dst_branch === 'develop') || (reqParsed.git.dst_branch.split("/")[0] === 'release' && reqParsed.git.src_branch.split("/")[0] === 'release')) {
+    console.log("bitrise")
+    console.log(reqParsed)
+    if (reqParsed.build_status === 1 && (reqParsed.git.src_branch === 'develop' && reqParsed.git.dst_branch === 'develop') 
+    || (reqParsed.git.dst_branch.split("/")[0] === 'release' && reqParsed.git.src_branch.split("/")[0] === 'release')) {
         logDb.type = 'bitrise build'
         logDb.project = project
         logDb.buildNumber = reqParsed.build_number
         let needAssign = !req.query.assign ? true : (req.query.assign == 'true')
-        let tasks = await redmine.bitriseHook(project, reqParsed.build_number, needAssign)
+        let tasks = await redmine.setStatusComplete(project, reqParsed.build_number, needAssign)
         logDb.tasks = tasks.join()
     } else {
 
