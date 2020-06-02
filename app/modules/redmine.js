@@ -70,7 +70,8 @@ class Redmine {
             }
         }        
         if (assignTo != null) {
-            let user_id = await this.getUserIdByGHLogin(assignTo)     
+            let user_id = await this.getUserIdByGHLogin(assignTo)    
+            payload["issue"] = {} 
             payload["issue"]["assigned_to_id"] = user_id
         }
         const promises = []
@@ -98,23 +99,28 @@ class Redmine {
         }
         if (assignTo != null) {
             let user_id = await this.getUserIdByGHLogin(assignTo)
+            payload["issue"] = {}
             payload["issue"]["assigned_to_id"] = user_id
         }
 
-        const promisesPre = []
+        const promisesNew = []
+        const promisesWork = []
         const promises = []
         for (let taskId of taskNumbers) {
             let taskInRedmine = await this.get('issues/' + taskId + '.json')
             // В сборку берем только задачи новые, в работе и на ревью
             if (taskInRedmine.issue.status.id == this.newStatus || taskInRedmine.issue.status.id == this.workStatus
             || taskInRedmine.issue.status.id == this.reviewStatus) {
-                // Прежде чем перевести в сборку ставим статус ревью
-                promisesPre.push(this.checkOnReviewStatus(taskId))
+                // Прежде чем перевести в сборку ставим статус работа у новых
+                promisesNew.push(this.checkOnReviewStatus(taskId))
+                // Прежде чем перевести в сборку ставим статус ревью у рабочих
+                promisesWork.push(this.checkOnReviewStatus(taskId))
 
                 promises.push(this.put('issues/' + taskId + '.json', payload))
             }
         }
-        await Promise.all(promisesPre);
+        await Promise.all(promisesNew);
+        await Promise.all(promisesWork);
         await Promise.all(promises);
     }
 
@@ -129,6 +135,7 @@ class Redmine {
         }
         if (assignTo != null) {
             let user_id = await this.getUserIdByGHLogin(assignTo)
+            payload["issue"] = {}
             payload["issue"]["assigned_to_id"] = user_id
         }
         const promises = []
@@ -180,6 +187,7 @@ class Redmine {
             }
         }
         if (needAssign) {
+            payload["issue"] = {}
             payload["issue"]["assigned_to_id"] = tester.value
         }
         let issueUrl = 'issues/' + issue.id + '.json'
