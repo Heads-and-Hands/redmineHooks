@@ -190,13 +190,13 @@ class Redmine {
             payload["issue"] = {}
             payload["issue"]["assigned_to_id"] = tester.value
         }
-        let issueUrl = 'issues/' + issue.id + '.json'
-
+        
         const issuesIds = []
         const promises = []
         if (issues.issues.length) {
             for (let issue of issues.issues) {
                 issuesIds.push(issue.id)
+                let issueUrl = 'issues/' + issue.id + '.json'
                 promises.push(this.put(issueUrl, payload))
             }
             await Promise.all(promises);
