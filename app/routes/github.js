@@ -22,7 +22,10 @@ router.post('/', async function (req, res, next) {
 
   let needAssign = !req.query.assign ? true : (req.query.assign == 'true')
   let event = req.header('X-GitHub-Event')
-  let payload = JSON.parse(req.body)
+  console.log("=========================");
+  console.log(req.body);
+  console.log("=========================");
+  let payload = JSON.parse(req.body.payload)
 
   switch (event) {
     case 'push':
