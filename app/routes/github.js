@@ -10,6 +10,14 @@ const keyGithub = key.KEY_GITHUB;
 var dbo = require('./../modules/db')
 var Result = dbo.mongoose.model('results', dbo.anySchema, 'results')
 
+router.get('/', async function (req, res, next) {
+  result = {
+    result: "ok"
+  };
+  console.log(result);
+  res.json(result);
+});
+
 router.post('/', async function (req, res, next) {
 
   let needAssign = !req.query.assign ? true : (req.query.assign == 'true')
