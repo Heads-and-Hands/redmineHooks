@@ -25,7 +25,7 @@ router.post('/', async function (req, res, next) {
   console.log("=========================");
   console.log(req.body);
   console.log("=========================");
-  let payload = JSON.parse(req.body.payload)
+  let payload = JSON.parse(req.body)
 
   switch (event) {
     case 'push':
