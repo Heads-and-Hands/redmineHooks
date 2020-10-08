@@ -93,7 +93,7 @@ router.post('/', async function (req, res, next) {
     date: new Date(),
     author: author,
     tasks: taskNumbers.join(),
-    project: payload.pull_request ? payload.pull_request.head.repo.name : '',
+    project: payload.repository ? payload.repository.name : '',
     event: event,
     action: action,
     needAssign: needAssign
