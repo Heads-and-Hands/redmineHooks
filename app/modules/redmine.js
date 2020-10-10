@@ -103,6 +103,8 @@ class Redmine {
             payload["issue"]["assigned_to_id"] = user_id
         }
 
+        console.log(payload);
+        
         const promisesNew = []
         const promisesWork = []
         const promises = []
