@@ -71,7 +71,7 @@ class Redmine {
         }        
         if (assignTo != null) {
             let user_id = await this.getUserIdByGHLogin(assignTo)    
-            payload["issue"] = {} 
+            //payload["issue"] = {} 
             payload["issue"]["assigned_to_id"] = user_id
         }
         const promises = []
@@ -99,7 +99,7 @@ class Redmine {
         }
         if (assignTo != null) {
             let user_id = await this.getUserIdByGHLogin(assignTo)
-            payload["issue"] = {}
+            //payload["issue"] = {}
             payload["issue"]["assigned_to_id"] = user_id
         }
 
@@ -135,7 +135,7 @@ class Redmine {
         }
         if (assignTo != null) {
             let user_id = await this.getUserIdByGHLogin(assignTo)
-            payload["issue"] = {}
+            //payload["issue"] = {}
             payload["issue"]["assigned_to_id"] = user_id
         }
         const promises = []
@@ -187,7 +187,7 @@ class Redmine {
             }
         }
         if (needAssign) {
-            payload["issue"] = {}
+            //payload["issue"] = {}
             payload["issue"]["assigned_to_id"] = tester.value
         }
         
